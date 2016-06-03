@@ -1,5 +1,5 @@
 {
-    "name": "consolidation-org/cgr",
+    "name": "consolidation/cgr",
     "description": "Safer alternative to 'composer global require'.",
     "keywords": ["package", "composer"],
     "type": "project",
