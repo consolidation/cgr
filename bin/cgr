@@ -1,0 +1,5 @@
+#!/usr/bin/env php
+<?php
+
+include __DIR__ . '/cgr.php';
+exit(main($argv));
