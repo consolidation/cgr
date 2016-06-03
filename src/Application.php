@@ -25,7 +25,7 @@ class Application
     {
         $optionDefaultValues = $this->getDefaultOptionValues($home);
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
-        list($projects, $composerArgs) = $this->separateProjectsFromArgs($argv, $options);
+        list($projects, $composerArgs) = $this->separateProjectsFromArgs($argv);
 
         $commandList = $this->getCommandStringList($composerArgs, $projects, $options);
         return $commandList;
@@ -164,7 +164,7 @@ class Application
                 // to indicate that this should be a pass-through call
                 // to composer, rather than one or more calls to
                 // 'composer require' to install global projects.
-                if (($sawGlobal == false) || ($arg != 'require')) {
+                if ((!$sawGlobal) || ($arg != 'require')) {
                     return array(array(), $argv);
                 }
             }

@@ -15,7 +15,7 @@ class CommandToExec
     /**
      * Hold some command values to later exec
      */
-    public function __construct($command, $arguments, $env = array(), $dir = false)
+    public function __construct($command, $arguments, $env = array(), $dir = '')
     {
         $this->command = $command;
         $this->arguments = $arguments;
@@ -54,12 +54,13 @@ class CommandToExec
      */
     public static function applyDir($dir)
     {
-        if ($dir) {
-            $origDir = getcwd();
-            static::mkdirParents($dir);
-            chdir($dir);
-            return $origDir;
+        if (empty($dir)) {
+            return $dir;
         }
+        $origDir = getcwd();
+        static::mkdirParents($dir);
+        chdir($dir);
+        return $origDir;
     }
 
     /**
@@ -115,8 +116,7 @@ class CommandToExec
     /**
      * Run a single command.
      *
-     * @param string $command
-     * @param array $arguments
+     * @param string $commandString
      * @return integer
      */
     public static function runCommand($commandString)
