@@ -25,14 +25,14 @@ class CgrTests extends \PHPUnit_Framework_TestCase
         $argv = array(
             'cgr',
             '--composer-path',
-            __DIR__ . '/test.sh',
+            'php ' . __DIR__ . '/composerMock.php',
             'x/y:1.0',
             'a/b=~2'
         );
         $exitCode = $this->application->run($argv, $this->workDir);
         $this->assertEquals(0, $exitCode);
-        $this->assertOutputFileContents('--working-dir={workdir}/.composer/global/a/b require a/b:~2', '/.composer/global/a/b');
-        $this->assertOutputFileContents('--working-dir={workdir}/.composer/global/x/y require x/y:1.0', '/.composer/global/x/y');
+        $this->assertOutputFileContents(__DIR__ . '/composerMock.php --working-dir={workdir}/.composer/global/a/b require a/b:~2', '/.composer/global/a/b');
+        $this->assertOutputFileContents(__DIR__ . '/composerMock.php --working-dir={workdir}/.composer/global/x/y require x/y:1.0', '/.composer/global/x/y');
     }
 
     function assertOutputFileContents($expected, $relativePath)
