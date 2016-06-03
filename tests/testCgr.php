@@ -24,11 +24,40 @@ class CgrTests extends \PHPUnit_Framework_TestCase
     {
         $argv = array(
             'cgr',
+            'x/y:1.0',
+            'a/b=~2'
+        );
+
+        $commandList = $this->application->parseArgvAndGetCommandList($argv, '/home/user');
+        $commandStrings = array();
+        foreach ($commandList as $command) {
+            $commandStrings[] = $command->getCommandString();
+        }
+        $actual = implode("\n", $commandStrings);
+        $expected = <<< EOT
+composer '--working-dir=/home/user/.composer/global/x/y' 'require' 'x/y:1.0'
+composer '--working-dir=/home/user/.composer/global/a/b' 'require' 'a/b:~2'
+EOT;
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Functional test using a mocked application: we call test.sh in
+     * place of composer, and it dumps its arguments to a file.
+     */
+    public function testApplicationFunctional()
+    {
+        if (getenv('CI')) {
+            $this->markTestSkipped('Functional test does not work on CI server. Output file not written to expected location.');
+        }
+        $argv = array(
+            'cgr',
             '--composer-path',
             'php ' . __DIR__ . '/composerMock.php',
             'x/y:1.0',
             'a/b=~2'
         );
+
         $exitCode = $this->application->run($argv, $this->workDir);
         $this->assertEquals(0, $exitCode);
         $this->assertOutputFileContents(__DIR__ . '/composerMock.php --working-dir={workdir}/.composer/global/a/b require a/b:~2', '/.composer/global/a/b');

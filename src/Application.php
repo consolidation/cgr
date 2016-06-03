@@ -13,12 +13,22 @@ class Application
      */
     public function run($argv, $home)
     {
+        $commandList = $this->parseArgvAndGetCommandList($argv, $home);
+        return $this->runCommandList($commandList);
+    }
+
+    /**
+     * Figure out everything we're going to do, but don't do any of it
+     * yet, just return the command objects to run.
+     */
+    public function parseArgvAndGetCommandList($argv, $home)
+    {
         $optionDefaultValues = $this->getDefaultOptionValues($home);
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
         list($projects, $composerArgs) = $this->separateProjectsFromArgs($argv, $options);
 
-        $commandList = $this->getCommandList($composerArgs, $projects, $options);
-        return $this->runList($commandList);
+        $commandList = $this->getCommandStringList($composerArgs, $projects, $options);
+        return $commandList;
     }
 
     /**
@@ -27,7 +37,7 @@ class Application
      * @param array $commandList An array of CommandToExec
      * @return integer
      */
-    public function runList($commandList)
+    public function runCommandList($commandList)
     {
         foreach ($commandList as $command) {
             $exitCode = $command->run();
@@ -53,7 +63,7 @@ class Application
      * @param array $options
      * @return CommandToExec
      */
-    public function getCommandList($composerArgs, $projects, $options)
+    public function getCommandStringList($composerArgs, $projects, $options)
     {
         $command = $options['composer-path'];
         if (empty($projects)) {
@@ -171,7 +181,7 @@ class Application
         $env = array("COMPOSER_BIN_DIR" => $binDir);
         $result = array();
         foreach ($projects as $project => $version) {
-            $installLocation = $this->createGlobalInstallLocation($project, $globalBaseDir);
+            $installLocation = "$globalBaseDir/$project";
             $projectWithVersion = $this->projectWithVersion($project, $version);
             $commandToExec = $this->globalRequireOne($command, $composerArgs, $projectWithVersion, $env, $installLocation);
             $result[] = $commandToExec;
@@ -238,23 +248,5 @@ class Application
     {
         $specialVersionChars = array('^', '~', '<', '>');
         return is_numeric($arg[0]) || in_array($arg[0], $specialVersionChars);
-    }
-
-    /**
-     * Create a directory at the specified path. Also create any parent
-     * directories that do not yet exist.
-     *
-     * @param $path The directory path to create.
-     * @return boolean
-     */
-    public function mkdirParents($path)
-    {
-        if (is_dir($path)) {
-            return true;
-        }
-
-        if ($this->mkdirParents(dirname($path))) {
-            return mkdir($path);
-        }
     }
 }

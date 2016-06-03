@@ -56,6 +56,7 @@ class CommandToExec
     {
         if ($dir) {
             $origDir = getcwd();
+            static::mkdirParents($dir);
             chdir($dir);
             return $origDir;
         }
@@ -91,6 +92,24 @@ class CommandToExec
             return;
         }
         putenv("$key=$value");
+    }
+
+    /**
+     * Create a directory at the specified path. Also create any parent
+     * directories that do not yet exist.
+     *
+     * @param $path The directory path to create.
+     * @return boolean
+     */
+    public static function mkdirParents($path)
+    {
+        if (is_dir($path)) {
+            return true;
+        }
+
+        if (static::mkdirParents(dirname($path))) {
+            return mkdir($path);
+        }
     }
 
     /**

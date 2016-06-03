@@ -20,9 +20,6 @@ cache:
     - vendor
     - $HOME/.composer/cache
 
-install:
-  - echo "disable_functions = " >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-
 before_script:
   - composer install
 
