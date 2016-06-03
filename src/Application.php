@@ -133,26 +133,39 @@ class Application
         $projects = array();
         $sawGlobal = false;
         foreach ($argv as $arg) {
-            // Any flags will just be passed through to each call to composer.
             if ($arg[0] == '-') {
+                // Any flags (first character is '-') will just be passed
+                // through to to composer. Flags interpreted by cgr have
+                // already been removed from $argv.
                 $composerArgs[] = $arg;
-            } // Arguments containing a '/' name projects
-            elseif (strpos($arg, '/') !== false) {
+            } elseif (strpos($arg, '/') !== false) {
+                // Arguments containing a '/' name projects.  We will split
+                // the project from its version, allowing the separator
+                // character to be either a '=' or a ':', and then store the
+                // result in the $projects array.
                 $projectAndVersion = explode(':', strtr($arg, '=', ':'), 2) + array('', '');
                 list($project, $version) = $projectAndVersion;
                 $projects[$project] = $version;
-            } // Arguments that are a Composer version should be attached
-            // to the previous project.
-            elseif ($this->isComposerVersion($arg)) {
+            } elseif ($this->isComposerVersion($arg)) {
+                // If an argument is a composer version, then we will alter
+                // the last project we saw, attaching this version to it.
+                // This allows us to handle 'a/b:1.0' and 'a/b 1.0' equivalently.
                 $keys = array_keys($projects);
                 $lastProject = array_pop($keys);
                 unset($projects[$lastProject]);
                 $projects[$lastProject] = $arg;
             } elseif ($arg == 'global') {
+                // Make note if we see the 'global' command.
                 $sawGlobal = true;
             } else {
+                // If we see any command other than 'global require',
+                // then we will pass *all* of the arguments through to
+                // composer unchanged. We return an empty projects array
+                // to indicate that this should be a pass-through call
+                // to composer, rather than one or more calls to
+                // 'composer require' to install global projects.
                 if (($sawGlobal == false) || ($arg != 'require')) {
-                    return array($argv, array());
+                    return array(array(), $argv);
                 }
             }
         }
@@ -172,7 +185,7 @@ class Application
      *   specifying the project name, and the value specifying its version.
      * @param array $options User options from the command line; see
      *   $optionDefaultValues in the main() function.
-     * @return integer
+     * @return array
      */
     public function globalRequire($command, $composerArgs, $projects, $options)
     {
@@ -187,23 +200,6 @@ class Application
             $result[] = $commandToExec;
         }
         return $result;
-    }
-
-    /**
-     * Create a separate installation directory for the project to be
-     * installed into.  Creates the directory (and its parents), and
-     * returns the path to the location created.
-     *
-     * @param string $project The project ("org/name") to be installed.
-     * @param string $globalBaseDir The base location where all projects are
-     *   installed (~/.composer/global)
-     * @return string
-     */
-    public function createGlobalInstallLocation($project, $globalBaseDir)
-    {
-        $installLocation = "$globalBaseDir/$project";
-        $this->mkdirParents($installLocation);
-        return $installLocation;
     }
 
     /**
