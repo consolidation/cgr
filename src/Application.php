@@ -4,6 +4,8 @@ namespace Consolidation\Cgr;
 
 class Application
 {
+    protected $outputFile = '';
+
     /**
      * Run the cgr tool, a safer alternative to `composer global require`.
      *
@@ -17,6 +19,14 @@ class Application
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
         $commandList = $this->separateProjectAndGetCommandList($argv, $home, $options);
         return $this->runCommandList($commandList, $options);
+    }
+
+    /**
+     * Set up output redirection
+     */
+    public function setOutputFile($outputFile)
+    {
+        $this->outputFile = $outputFile;
     }
 
     /**
@@ -50,7 +60,7 @@ class Application
     public function runCommandList($commandList, $options)
     {
         foreach ($commandList as $command) {
-            $exitCode = $command->run($options['cgr-output']);
+            $exitCode = $command->run($this->outputFile);
             if ($exitCode) {
                 return $exitCode;
             }
@@ -94,7 +104,6 @@ class Application
             'composer-path' => 'composer',
             'base-dir' => "$home/.composer/global",
             'bin-dir' => "$home/.composer/vendor/bin",
-            'cgr-output' => '',
         );
     }
 

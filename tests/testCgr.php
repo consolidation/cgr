@@ -105,8 +105,6 @@ EOT;
             'cgr',
             '--composer-path',
             'echo',
-            '--cgr-output',
-            $this->workDir . '/output.txt',
             'x/y:1.0',
             'a/b=~2'
         );
@@ -149,8 +147,7 @@ EOT;
      */
     public function testApplicationOutput($argv, $expected)
     {
-        $argv[] = '--cgr-output';
-        $argv[] = $this->workDir . '/output.txt';
+        $this->application->setOutputFile($this->workDir . '/output.txt');
 
         $exitCode = $this->application->run($argv, $this->workDir);
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
@@ -196,9 +193,8 @@ EOT;
             "--name=test/test",
             '--no-interaction',
             '--working-dir=' . $this->workDir,
-            '--cgr-output',
-            $this->workDir . '/output.txt',
         );
+        $this->application->setOutputFile($this->workDir . '/output.txt');
         $exitCode = $this->application->run($argv, $this->workDir);
         $this->assertEquals(0, $exitCode);
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
