@@ -202,10 +202,6 @@ EOT;
         $exitCode = $this->application->run($argv, $this->workDir);
         $this->assertEquals(0, $exitCode);
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
-        $output = file_get_contents($this->workDir . '/output.txt');
-        $expected = '';
-        $expected = str_replace('{workdir}', $this->workDir, $expected);
-        $this->assertEquals($expected, rtrim($output));
         $this->assertFileExists($this->workDir . '/composer.json', 'composer.json created');
         $composerJson = file_get_contents($this->workDir . '/composer.json');
         $expected = <<<EOT
