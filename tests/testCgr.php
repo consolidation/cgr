@@ -118,22 +118,53 @@ EOT;
             '--composer-path',
             'php ' . __DIR__ . '/echoPrintenv.php',
             '--bin-dir',
-            '/a/b/.composer/bin',
+            '/p/q/.composer/bin',
             'a/b:1.0'
         );
         $expectedEchoPrintenv = <<< EOT
 --working-dir={workdir}/.composer/global/a/b require a/b:1.0
-/a/b/.composer/bin
+/p/q/.composer/bin
+EOT;
+
+        $argvEchoPrintenvNoFlag = array(
+            'cgr',
+            '--composer-path',
+            'php ' . __DIR__ . '/echoPrintenv.php',
+            'a/b:1.0'
+        );
+        $expectedEchoPrintenvNoFlag = <<< EOT
+--working-dir={workdir}/.composer/global/a/b require a/b:1.0
+{workdir}/.composer/vendor/bin
+EOT;
+
+        $envEchoPrintenvNoFlag = array(
+            'CGR_BIN_DIR' => '/home/user/bin',
+        );
+        $expectedEchoPrintenvNoFlagWithEnv = <<< EOT
+--working-dir={workdir}/.composer/global/a/b require a/b:1.0
+/home/user/bin
 EOT;
 
         return array(
             array(
                 $argvEcho,
+                array(),
                 $expectedEcho,
             ),
             array(
                 $argvEchoPrintenv,
+                array(),
                 $expectedEchoPrintenv,
+            ),
+            array(
+                $argvEchoPrintenvNoFlag,
+                array(),
+                $expectedEchoPrintenvNoFlag,
+            ),
+            array(
+                $argvEchoPrintenvNoFlag,
+                $envEchoPrintenvNoFlag,
+                $expectedEchoPrintenvNoFlagWithEnv,
             ),
         );
     }
@@ -145,11 +176,13 @@ EOT;
      *
      * @dataProvider testApplicationOutputValues
      */
-    public function testApplicationOutput($argv, $expected)
+    public function testApplicationOutput($argv, $env, $expected)
     {
         $this->application->setOutputFile($this->workDir . '/output.txt');
 
+        $origEnv = CommandToExec::applyEnv($env);
         $exitCode = $this->application->run($argv, $this->workDir);
+        CommandToExec::applyEnv($origEnv);
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
         $output = file_get_contents($this->workDir . '/output.txt');
         $expected = str_replace('{workdir}', $this->workDir, $expected);

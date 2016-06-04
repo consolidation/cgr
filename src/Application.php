@@ -16,6 +16,8 @@ class Application
     public function run($argv, $home)
     {
         $optionDefaultValues = $this->getDefaultOptionValues($home);
+        $optionDefaultValues = $this->overlayEnvironmentValues($optionDefaultValues);
+
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
         $commandList = $this->separateProjectAndGetCommandList($argv, $home, $options);
         return $this->runCommandList($commandList, $options);
@@ -36,6 +38,8 @@ class Application
     public function parseArgvAndGetCommandList($argv, $home)
     {
         $optionDefaultValues = $this->getDefaultOptionValues($home);
+        $optionDefaultValues = $this->overlayEnvironmentValues($optionDefaultValues);
+
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
         return $this->separateProjectAndGetCommandList($argv, $home, $options);
     }
@@ -105,6 +109,23 @@ class Application
             'base-dir' => "$home/.composer/global",
             'bin-dir' => "$home/.composer/vendor/bin",
         );
+    }
+
+    /**
+     * Replace option default values with the corresponding
+     * environment variable value, if it is set.
+     */
+    protected function overlayEnvironmentValues($defaults)
+    {
+        foreach ($defaults as $key => $value) {
+            $envKey = 'CGR_' . strtoupper(strtr($key, '-', '_'));
+            $envValue = getenv($envKey);
+            if ($envValue) {
+                $defaults[$key] = $envValue;
+            }
+        }
+
+        return $defaults;
     }
 
     /**
