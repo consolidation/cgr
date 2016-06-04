@@ -38,12 +38,12 @@ class CommandToExec
      * Run our command. Set up the environment, as needed, ensuring that
      * it is restored at the end of the run.
      */
-    public function run()
+    public function run($stdoutFile = '')
     {
         $commandString = $this->getCommandString();
         $origEnv = static::applyEnv($this->env);
         $origDir = static::applyDir($this->dir);
-        $exitCode = static::runCommand($commandString);
+        $exitCode = static::runCommand($commandString, $stdoutFile);
         static::applyEnv($origEnv);
         static::applyDir($origDir);
         return $exitCode;
@@ -119,9 +119,13 @@ class CommandToExec
      * @param string $commandString
      * @return integer
      */
-    public static function runCommand($commandString)
+    public static function runCommand($commandString, $stdoutFile = '')
     {
-        $process = proc_open($commandString, array(0 => STDIN, 1 => STDOUT, 2 => STDERR), $pipes);
+        $stdout = STDOUT;
+        if (!empty($stdoutFile)) {
+            $stdout = array("file", $stdoutFile, "a");
+        }
+        $process = proc_open($commandString, array(0 => STDIN, 1 => $stdout, 2 => STDERR), $pipes);
         $procStatus = proc_get_status($process);
         $exitCode = proc_close($process);
         return ($procStatus["running"] ? $exitCode : $procStatus["exitcode"]);

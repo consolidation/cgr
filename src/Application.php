@@ -13,8 +13,10 @@ class Application
      */
     public function run($argv, $home)
     {
-        $commandList = $this->parseArgvAndGetCommandList($argv, $home);
-        return $this->runCommandList($commandList);
+        $optionDefaultValues = $this->getDefaultOptionValues($home);
+        list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
+        $commandList = $this->separateProjectAndGetCommandList($argv, $home, $options);
+        return $this->runCommandList($commandList, $options);
     }
 
     /**
@@ -25,8 +27,16 @@ class Application
     {
         $optionDefaultValues = $this->getDefaultOptionValues($home);
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
-        list($projects, $composerArgs) = $this->separateProjectsFromArgs($argv);
+        return $this->separateProjectAndGetCommandList($argv, $home, $options);
+    }
 
+    /**
+     * Figure out everything we're going to do, but don't do any of it
+     * yet, just return the command objects to run.
+     */
+    public function separateProjectAndGetCommandList($argv, $home, $options)
+    {
+        list($projects, $composerArgs) = $this->separateProjectsFromArgs($argv);
         $commandList = $this->getCommandStringList($composerArgs, $projects, $options);
         return $commandList;
     }
@@ -37,10 +47,10 @@ class Application
      * @param array $commandList An array of CommandToExec
      * @return integer
      */
-    public function runCommandList($commandList)
+    public function runCommandList($commandList, $options)
     {
         foreach ($commandList as $command) {
-            $exitCode = $command->run();
+            $exitCode = $command->run($options['cgr-output']);
             if ($exitCode) {
                 return $exitCode;
             }
@@ -84,6 +94,7 @@ class Application
             'composer-path' => 'composer',
             'base-dir' => "$home/.composer/global",
             'bin-dir' => "$home/.composer/vendor/bin",
+            'cgr-output' => '',
         );
     }
 
