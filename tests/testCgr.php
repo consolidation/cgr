@@ -195,6 +195,7 @@ EOT;
             'init',
             "--name=test/test",
             '--no-interaction',
+            '--working-dir=' . $this->workDir,
             '--cgr-output',
             $this->workDir . '/output.txt',
         );
