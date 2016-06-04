@@ -12,7 +12,7 @@ Still new; code coverage is good, but only lightly used in real-world environmen
 
 The Composer `global require` command is a recommended installation technique for many PHP commandline tools. Composer itself recommends this "convenience" command for exactly this purpose.  Unfortunately, this recommendation is at odds with the basic assumption of Composer, which is that every project's dependencies should be managed independently.  The Composer `global` command creates a single "global" project; projects installed via `composer global require` will all be installed in this location, and their dependencies will all be merged.  This means that conflicts can arise between two independent projects that were never designed to work together, and have no need for their dependencies to be combined into a single autoloader.  When this sort of situation does arise, it is often very difficult for beginners to diagnose.
 
-This script, called "Cgr", which is short for "composer global require", offers a replacement mechanism for installing PHP commandline tools globally.  The Cgr script will make a separate directory for each project installed; by default, the installation location is `~/.composer/global/org/project`.  Any binary scripts listed in the installed project's composer.json file will be installed to the standard Composer bin directory, `~/.composer/vendor/bin`.
+This script, called `cgr`, is named after "composer global require", the Composer command that it emulates.  It offers a replacement mechanism for installing PHP commandline tools globally that is functionally equivalent (nearly) to the existing command, but much safer.  The Cgr script will make a separate directory for each project installed; by default, the installation location is `~/.composer/global/org/project`.  Any binary scripts listed in the installed project's composer.json file will be installed to the standard Composer bin directory, `~/.composer/vendor/bin`.
 
 ## Installation and Usage
 
@@ -37,6 +37,10 @@ Option           | Environment Variable | Description
 To configure cgr to install binaries to ~/bin, add the following to your ~/.bashrc file:
 
 `export CGR_BIN_DIR=$HOME/bin`
+
+## Limitations
+
+Composer will also load Composer Plugins from the "global" Composer project. This is rare; however, if you would like to install a Composer Installer globally, then you must use the `composer global require` command directly. The cgr script isolates the projects it installs from each other to avoid potential conflicts between dependencies; this isolation also makes any Composer Plugins unavailable in the global context.
 
 ## Alternative Solutions
 
