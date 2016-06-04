@@ -44,8 +44,9 @@ Composer will also load Composer Plugins from the "global" Composer project. Thi
 
 ## Alternative Solutions
 
-The cgr script maintains the convenience of automatically managing the global installation location for you; however, if this is not desired, you may simply set:
+The cgr script maintains the convenience of automatically managing the global installation location for you; however, if this is not desired, you may simply run commands similar to:
 
-`export COMPOSER_BIN_DIR=$HOME/bin`
+`COMPOSER_BIN_DIR=$HOME/bin composer require org/project:~1.0`
 
-Then, use `composer require` rather than `composer global require` to install projects. If you go this route, you will need to set up your install location manually using `mkdir` and `cd` as necessary prior to running `composer require`.
+If you go this route, you will need to set up your install location manually using `mkdir` and `cd` as necessary prior to running `composer require`. You cannot simply set COMPOSER_BIN_DIR globally, as doing this would cause the binaries from local projects to be installed into your global bin directory, which would, of course, not be desirable.
+
