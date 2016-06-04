@@ -29,31 +29,58 @@ class CgrTests extends \PHPUnit_Framework_TestCase
         static::fileDeleteRecursive(static::$tempDir);
     }
 
-    /**
-     * Functional test using a mocked application: we call test.sh in
-     * place of composer, and it dumps its arguments to a file.
-     */
-    public function testApplication()
+    public function testApplicationValues()
     {
-        $argv = array(
+        $argvCgrMultipleProjectForms = array(
             'cgr',
             'x/y:1.0',
             'a/b=~2',
             'p/q',
             '^3',
+            'd/e',
         );
+        $expectedCgrMultipleProjectForms = <<< EOT
+composer '--working-dir=/home/user/.composer/global/x/y' 'require' 'x/y:1.0'
+composer '--working-dir=/home/user/.composer/global/a/b' 'require' 'a/b:~2'
+composer '--working-dir=/home/user/.composer/global/p/q' 'require' 'p/q:^3'
+composer '--working-dir=/home/user/.composer/global/d/e' 'require' 'd/e'
+EOT;
 
+        $argvGlobalUpdate = array(
+            'composer',
+            'global',
+            'update',
+        );
+        $expectedGlobalUpdate = <<< EOT
+composer 'global' 'update'
+EOT;
+
+        return array(
+            array(
+                $argvCgrMultipleProjectForms,
+                $expectedCgrMultipleProjectForms,
+            ),
+            array(
+                $argvGlobalUpdate,
+                $expectedGlobalUpdate,
+            ),
+        );
+    }
+
+    /**
+     * Functional test using a mocked application: we call test.sh in
+     * place of composer, and it dumps its arguments to a file.
+     *
+     * @dataProvider testApplicationValues
+     */
+    public function testApplication($argv, $expected)
+    {
         $commandList = $this->application->parseArgvAndGetCommandList($argv, '/home/user');
         $commandStrings = array();
         foreach ($commandList as $command) {
             $commandStrings[] = $command->getCommandString();
         }
         $actual = implode("\n", $commandStrings);
-        $expected = <<< EOT
-composer '--working-dir=/home/user/.composer/global/x/y' 'require' 'x/y:1.0'
-composer '--working-dir=/home/user/.composer/global/a/b' 'require' 'a/b:~2'
-composer '--working-dir=/home/user/.composer/global/p/q' 'require' 'p/q:^3'
-EOT;
         $this->assertEquals($expected, $actual);
     }
 
