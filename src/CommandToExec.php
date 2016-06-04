@@ -122,10 +122,12 @@ class CommandToExec
     public static function runCommand($commandString, $stdoutFile = '')
     {
         $stdout = STDOUT;
+        $stderr = STDERR;
         if (!empty($stdoutFile)) {
             $stdout = array("file", $stdoutFile, "a");
+            $stderr = $stdout;
         }
-        $process = proc_open($commandString, array(0 => STDIN, 1 => $stdout, 2 => STDERR), $pipes);
+        $process = proc_open($commandString, array(0 => STDIN, 1 => $stdout, 2 => $stderr), $pipes);
         $procStatus = proc_get_status($process);
         $exitCode = proc_close($process);
         return ($procStatus["running"] ? $exitCode : $procStatus["exitcode"]);

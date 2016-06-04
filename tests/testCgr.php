@@ -55,6 +55,16 @@ EOT;
 composer 'global' 'update'
 EOT;
 
+        $argvComposerInit = array(
+            'composer',
+            'init',
+            "--name=test/test",
+            '--no-interaction',
+        );
+        $expectedComposerInit = <<< EOT
+composer 'init' '--name=test/test' '--no-interaction'
+EOT;
+
         return array(
             array(
                 $argvCgrMultipleProjectForms,
@@ -63,6 +73,10 @@ EOT;
             array(
                 $argvGlobalUpdate,
                 $expectedGlobalUpdate,
+            ),
+            array(
+                $argvComposerInit,
+                $expectedComposerInit,
             ),
         );
     }
@@ -181,9 +195,16 @@ EOT;
             'init',
             "--name=test/test",
             '--no-interaction',
+            '--cgr-output',
+            $this->workDir . '/output.txt',
         );
         $exitCode = $this->application->run($argv, $this->workDir);
         $this->assertEquals(0, $exitCode);
+        $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
+        $output = file_get_contents($this->workDir . '/output.txt');
+        $expected = '';
+        $expected = str_replace('{workdir}', $this->workDir, $expected);
+        $this->assertEquals($expected, rtrim($output));
         $this->assertFileExists($this->workDir . '/composer.json', 'composer.json created');
         $composerJson = file_get_contents($this->workDir . '/composer.json');
         $expected = <<<EOT
