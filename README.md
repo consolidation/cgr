@@ -6,7 +6,7 @@ Provide a safe alternative to `composer global require`.
 
 ## Component Status
 
-Still new; lightly tested.
+Still new; code coverage is good, but only lightly used in real-world environments.
 
 ## Motivation
 
@@ -20,4 +20,28 @@ Because the cgr script has no dependencies of its own, it is safe to install via
 
 `composer global require consolidation/cgr`
 
-If you have not already done so, you will also need to add `~/.composer/vendor/bin` to your $PATH.  Thereafter, you may subsitute `cgr` for any commandline tool whose installation instructions recommends the use of `composer global require`.
+If you have not already done so, you will also need to add `~/.composer/vendor/bin` to your $PATH.  Thereafter, you may subsitute `cgr` for any commandline tool whose installation instructions recommends the use of Composer `global require`.
+
+Example:
+
+`cgr drush/drush`
+
+The behavior of the cgr script can be customized with commandline options and environment variables.
+
+Option           | Environment Variable | Description
+-----------------|----------------------|-----------------------------------
+--composer-path  | CGR_COMPOSER_PATH    | The path to the Composer binary.
+--base-dir       | CGR_BASE_DIR         | Where to store "global" projects.
+--bin-dir        | CGR_BIN_DIR          | Where to install project binaries.
+
+To configure cgr to install binaries to ~/bin, add the following to your ~/.bashrc file:
+
+`export CGR_BIN_DIR=$HOME/bin`
+
+## Alternative Solutions
+
+The cgr script maintains the convenience of automatically managing the global installation location for you; however, if this is not desired, you may simply set:
+
+`export COMPOSER_BIN_DIR=$HOME/bin`
+
+Then, use `composer require` rather than `composer global require` to install projects. If you go this route, you will need to set up your install location manually using `mkdir` and `cd` as necessary prior to running `composer require`.
