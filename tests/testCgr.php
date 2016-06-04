@@ -5,15 +5,28 @@ class CgrTests extends \PHPUnit_Framework_TestCase
 {
     protected $application;
     protected $workDir;
+    protected static $tempDir;
 
-    function setUp() {
+    static function setUpBeforeClass()
+    {
+        static::$tempDir = static::tempdir();
+    }
+
+    function setUp()
+    {
         $this->application = new Application();
-        $this->workDir = $this->tempdir();
+        $this->workDir = static::tempdir(static::$tempDir);
         chdir($this->workDir);
     }
 
-    function tearDown() {
-        $this->fileDeleteRecursive($this->workDir);
+    function tearDown()
+    {
+        static::fileDeleteRecursive($this->workDir);
+    }
+
+    static function tearDownAfterClass()
+    {
+        static::fileDeleteRecursive(static::$tempDir);
     }
 
     /**
@@ -25,7 +38,9 @@ class CgrTests extends \PHPUnit_Framework_TestCase
         $argv = array(
             'cgr',
             'x/y:1.0',
-            'a/b=~2'
+            'a/b=~2',
+            'p/q',
+            '^3',
         );
 
         $commandList = $this->application->parseArgvAndGetCommandList($argv, '/home/user');
@@ -37,6 +52,7 @@ class CgrTests extends \PHPUnit_Framework_TestCase
         $expected = <<< EOT
 composer '--working-dir=/home/user/.composer/global/x/y' 'require' 'x/y:1.0'
 composer '--working-dir=/home/user/.composer/global/a/b' 'require' 'a/b:~2'
+composer '--working-dir=/home/user/.composer/global/p/q' 'require' 'p/q:^3'
 EOT;
         $this->assertEquals($expected, $actual);
     }
@@ -64,6 +80,24 @@ EOT;
         $this->assertOutputFileContents(__DIR__ . '/composerMock.php --working-dir={workdir}/.composer/global/x/y require x/y:1.0', '/.composer/global/x/y');
     }
 
+    /**
+     * Test with the real composer executable.  Use cgr to install
+     * cgr, and confirm that ~/.composer/vendor/bin is updated.
+     */
+    public function testApplicationWithComposer()
+    {
+        $argv = array(
+            'cgr',
+            '--no-update',
+            'consolidation/cgr:1.0',
+        );
+        $exitCode = $this->application->run($argv, $this->workDir);
+        $this->assertEquals(0, $exitCode);
+        $this->assertTrue(file_exists($this->workDir . '/.composer/global/consolidation/cgr/composer.json'));
+        $composerJson = file_get_contents($this->workDir . '/.composer/global/consolidation/cgr/composer.json');
+        $this->assertContains('"consolidation/cgr": "1.0"', $composerJson);
+    }
+
     function assertOutputFileContents($expected, $relativePath)
     {
         $expected = str_replace('{workdir}', $this->workDir, $expected);
@@ -75,7 +109,7 @@ EOT;
         $this->assertEquals($expected, $contents);
     }
 
-    function tempdir($baseDir = false, $prefix = '')
+    static function tempdir($baseDir = false, $prefix = '')
     {
         $tempfile = tempnam($baseDir,$prefix);
         if (file_exists($tempfile)) {
@@ -87,7 +121,7 @@ EOT;
         }
     }
 
-    function fileDeleteRecursive($dir) {
+    static function fileDeleteRecursive($dir) {
       // Do not delete symlinked files, only unlink symbolic links
       if (is_link($dir)) {
         return unlink($dir);
@@ -100,7 +134,7 @@ EOT;
         @chmod($dir, 0777);
         return unlink($dir);
       }
-      if ($this->deleteDirContents($dir) === FALSE) {
+      if (static::deleteDirContents($dir) === FALSE) {
         return false;
       }
       @chmod($dir, 0777);
@@ -123,7 +157,7 @@ EOT;
      *
      * @see drush_delete_dir_contents()
      */
-    function deleteDirContents($dir) {
+    static function deleteDirContents($dir) {
       $scandir = @scandir($dir);
       if (!is_array($scandir)) {
         return false;
@@ -133,7 +167,7 @@ EOT;
           continue;
         }
         @chmod($dir, 0777);
-        if (!$this->fileDeleteRecursive($dir . '/' . $item)) {
+        if (!static::fileDeleteRecursive($dir . '/' . $item)) {
           return true;
         }
       }
