@@ -12,7 +12,7 @@ Still new; code coverage is good, but only lightly used in real-world environmen
 
 The Composer `global require` command is a recommended installation technique for many PHP commandline tools; however, users who install tools in this way risk encountering installation failures caused by dependency conflicts between different projects. The cgr script behaves similarly to `composer global require`, using `composer require` to install a global-per-user copy of a commandline tool, but in an isolated location that will not experience dependency conflicts with other globally-installed tools.
 
-** The cgr script is unrelated to security; it is not any more, nor any less secure than installing via composer global require. ** 
+**The cgr script is unrelated to security; it is not any more, nor any less secure than installing via composer global require.** 
 
 Composer itself recommends `composer global require` as a "convenience" command for installing commandline tools.  Unfortunately, this recommendation is at odds with the basic assumption of Composer, which is that every project's dependencies should be managed independently.  The Composer `global` command creates a single "global" project; projects installed via `composer global require` will all be installed in this location, and their dependencies will all be merged.  This means that conflicts can arise between two independent projects that were never designed to work together, and have no need for their dependencies to be combined into a single autoloader.  When this sort of situation does arise, it is often very difficult for beginners to diagnose.
 
