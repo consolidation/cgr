@@ -44,6 +44,10 @@ To configure cgr to install binaries to ~/bin, add the following to your ~/.bash
 
 You may select any directory you like for the `CGR_BIN_DIR`, as long as if is in your $PATH.
 
+## Troubleshooting
+
+If you find that `cgr` is still behaving like a standard Composer `global require` command, double-check the settings of your $PATH variable, and use `which cgr` and `alias cgr` to deterime whether or not this script is being selected by your shell. It is possible that cgr may conflict with some other tool; for example, [the oh-my-zsh project defines a cgr alias](https://github.com/robbyrussell/oh-my-zsh/blob/0d45e771c8d3d1f7c465be465fcbdb4169141347/plugins/composer/composer.plugin.zsh#L46). If this is an issue for you, either `unalias cgr`, or perhaps add `alias cgrx="$HOME/.composer/vendor/bin/cgr"` to run this experimental tool as `cgrx`.
+
 ## Limitations
 
 Composer will also load Composer Plugins from the "global" Composer project. This is rare; however, if you would like to install a Composer Installer globally, then you must use the `composer global require` command directly. The cgr script isolates the projects it installs from each other to avoid potential conflicts between dependencies; this isolation also makes any Composer Plugins unavailable in the global context.
@@ -56,3 +60,6 @@ The cgr script maintains the convenience of automatically managing the global in
 
 If you go this route, you will need to set up your install location manually using `mkdir` and `cd` as necessary prior to running `composer require`. You cannot simply set COMPOSER_BIN_DIR globally, as doing this would cause the binaries from local projects to be installed into your global bin directory, which would, of course, not be desirable.
 
+## Future Development
+
+It is hoped that this tool will be an interim solution, until changes in Composer make it unnecessary.  See [the Composer issue](https://github.com/composer/composer/issues/5390#issuecomment-224011226) for updates.
