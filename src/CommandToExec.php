@@ -42,43 +42,11 @@ class CommandToExec
     {
         $commandString = $this->getCommandString();
         $origEnv = $this->env->apply($this->env);
-        $origDir = static::applyDir($this->dir);
+        $origDir = FileSystemUtils::applyDir($this->dir);
         $exitCode = static::runCommand($commandString, $stdoutFile);
         $origEnv->apply();
-        static::applyDir($origDir);
+        FileSystemUtils::applyDir($origDir);
         return $exitCode;
-    }
-
-    /**
-     * Set the current working directory if it was specified.
-     */
-    public static function applyDir($dir)
-    {
-        if (empty($dir)) {
-            return $dir;
-        }
-        $origDir = getcwd();
-        static::mkdirParents($dir);
-        chdir($dir);
-        return $origDir;
-    }
-
-    /**
-     * Create a directory at the specified path. Also create any parent
-     * directories that do not yet exist.
-     *
-     * @param $path The directory path to create.
-     * @return boolean
-     */
-    public static function mkdirParents($path)
-    {
-        if (is_dir($path)) {
-            return true;
-        }
-
-        if (static::mkdirParents(dirname($path))) {
-            return mkdir($path);
-        }
     }
 
     /**
