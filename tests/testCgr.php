@@ -176,13 +176,14 @@ EOT;
      *
      * @dataProvider testApplicationOutputValues
      */
-    public function testApplicationOutput($argv, $env, $expected)
+    public function testApplicationOutput($argv, $envArray, $expected)
     {
         $this->application->setOutputFile($this->workDir . '/output.txt');
 
-        $origEnv = CommandToExec::applyEnv($env);
+        $env = new Env($envArray);
+        $origEnv = $env->apply();
         $exitCode = $this->application->run($argv, $this->workDir);
-        CommandToExec::applyEnv($origEnv);
+        $origEnv->apply();
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
         $output = file_get_contents($this->workDir . '/output.txt');
         $expected = str_replace('{workdir}', $this->workDir, $expected);

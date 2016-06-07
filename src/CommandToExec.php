@@ -19,7 +19,7 @@ class CommandToExec
     {
         $this->command = $command;
         $this->arguments = $arguments;
-        $this->env = $env;
+        $this->env = new Env($env);
         $this->dir = $dir;
     }
 
@@ -41,10 +41,10 @@ class CommandToExec
     public function run($stdoutFile = '')
     {
         $commandString = $this->getCommandString();
-        $origEnv = static::applyEnv($this->env);
+        $origEnv = $this->env->apply($this->env);
         $origDir = static::applyDir($this->dir);
         $exitCode = static::runCommand($commandString, $stdoutFile);
-        static::applyEnv($origEnv);
+        $origEnv->apply();
         static::applyDir($origDir);
         return $exitCode;
     }
@@ -61,38 +61,6 @@ class CommandToExec
         static::mkdirParents($dir);
         chdir($dir);
         return $origDir;
-    }
-
-    /**
-     * Apply a set of environment variables; return the original
-     * value of any value that is set, to avoid polluting the environment.
-     *
-     * @param array $env An array of key:value pairs
-     * @return array
-     */
-    public static function applyEnv($env)
-    {
-        $orig = array();
-        foreach ($env as $key => $value) {
-            $orig[$key] = getenv($key);
-            static::setEnvValue($key, $value);
-        }
-        return $orig;
-    }
-
-    /**
-     * Set or un-set one environment variable
-     *
-     * @param string $key The environment variable to set or unset
-     * @param mixed $value THe value to set the variable to, or false to unset.
-     */
-    public static function setEnvValue($key, $value)
-    {
-        if ($value === false) {
-            putenv($key);
-            return;
-        }
-        putenv("$key=$value");
     }
 
     /**
