@@ -24,7 +24,7 @@ class Application
     }
 
     /**
-     * Set up output redirection
+     * Set up output redirection. Used by tests.
      */
     public function setOutputFile($outputFile)
     {
@@ -50,8 +50,8 @@ class Application
      */
     public function separateProjectAndGetCommandList($argv, $home, $options)
     {
-        list($projects, $composerArgs) = $this->separateProjectsFromArgs($argv);
-        $commandList = $this->getCommandStringList($composerArgs, $projects, $options);
+        list($command, $projects, $composerArgs) = $this->separateProjectsFromArgs($argv, $options);
+        $commandList = $this->getCommandsToExec($command, $composerArgs, $projects, $options);
         return $commandList;
     }
 
@@ -87,13 +87,18 @@ class Application
      * @param array $options
      * @return CommandToExec
      */
-    public function getCommandStringList($composerArgs, $projects, $options)
+    public function getCommandsToExec($command, $composerArgs, $projects, $options)
     {
-        $command = $options['composer-path'];
-        if (empty($projects)) {
-            return array(new CommandToExec($command, $composerArgs));
+        $execPath = $options['composer-path'];
+        // If command was not 'global require', 'global update' or
+        // 'global remove', then call through to the standard composer
+        // with all of the original args.
+        if (empty($command)) {
+            return array(new CommandToExec($execPath, $composerArgs));
         }
-        return $this->globalRequire($command, $composerArgs, $projects, $options);
+        // Call requireCommand, updateCommand, or removeCommand, as appropriate.
+        $methodName = "{$command}Command";
+        return $this->$methodName($execPath, $composerArgs, $projects, $options);
     }
 
     /**
@@ -105,6 +110,7 @@ class Application
     public function getDefaultOptionValues($home)
     {
         return array(
+            'composer' => false,
             'composer-path' => 'composer',
             'base-dir' => "$home/.composer/global",
             'bin-dir' => "$home/.composer/vendor/bin",
@@ -142,7 +148,8 @@ class Application
      */
     public function parseOutOurOptions($argv, $optionDefaultValues)
     {
-        array_shift($argv);
+        $argv0 = array_shift($argv);
+        $options['composer'] = (strpos($argv0, 'composer') !== false);
         $passAlongArgvItems = array();
         $options = array();
         while (!empty($argv)) {
@@ -168,11 +175,13 @@ class Application
      * @param array $argv The $argv array from parseOutOurOptions()
      * @return array
      */
-    public function separateProjectsFromArgs($argv)
+    public function separateProjectsFromArgs($argv, $options)
     {
+        $cgrCommands = array('require', 'update', 'remove');
+        $command = 'require';
         $composerArgs = array();
         $projects = array();
-        $sawGlobal = false;
+        $globalMode = !$options['composer'];
         foreach ($argv as $arg) {
             if ($arg[0] == '-') {
                 // Any flags (first character is '-') will just be passed
@@ -197,20 +206,22 @@ class Application
                 $projects[$lastProject] = $arg;
             } elseif ($arg == 'global') {
                 // Make note if we see the 'global' command.
-                $sawGlobal = true;
+                $globalMode = true;
             } else {
-                // If we see any command other than 'global require',
+                // If we see any command other than 'global [require|update|remove]',
                 // then we will pass *all* of the arguments through to
                 // composer unchanged. We return an empty projects array
                 // to indicate that this should be a pass-through call
                 // to composer, rather than one or more calls to
                 // 'composer require' to install global projects.
-                if ((!$sawGlobal) || ($arg != 'require')) {
-                    return array(array(), $argv);
+                if ((!$globalMode) || (!in_array($arg, $cgrCommands))) {
+                    return array('', array(), $argv);
                 }
+                // Remember which command we saw
+                $command = $arg;
             }
         }
-        return array($projects, $composerArgs);
+        return array($command, $projects, $composerArgs);
     }
 
     /**
@@ -228,7 +239,7 @@ class Application
      *   $optionDefaultValues in the main() function.
      * @return array
      */
-    public function globalRequire($command, $composerArgs, $projects, $options)
+    public function requireCommand($execPath, $composerArgs, $projects, $options)
     {
         $globalBaseDir = $options['base-dir'];
         $binDir = $options['bin-dir'];
@@ -237,9 +248,39 @@ class Application
         foreach ($projects as $project => $version) {
             $installLocation = "$globalBaseDir/$project";
             $projectWithVersion = $this->projectWithVersion($project, $version);
-            $commandToExec = $this->globalRequireOne($command, $composerArgs, $projectWithVersion, $env, $installLocation);
+            $commandToExec = $this->buildGlobalRequireCommand($execPath, $composerArgs, $projectWithVersion, $env, $installLocation);
             $result[] = $commandToExec;
         }
+        return $result;
+    }
+
+    /**
+     * Run `composer global update`. Not only do we want to update the
+     * "global" Composer project, we also want to update all of the
+     * "isolated" projects installed via cgr in ~/.composer/global.
+     *
+     * @param string $command The path to composer
+     * @param array $composerArgs Anything from the global $argv to be passed
+     *   on to Composer
+     * @param array $projects A list of projects to update. Must be empty
+     *   for now -- not supported yet (always updates all projects).
+     * @param array $options User options from the command line; see
+     *   $optionDefaultValues in the main() function.
+     * @return array
+     */
+    public function updateCommand($execPath, $composerArgs, $projects, $options)
+    {
+        $result = array();
+        return $result;
+    }
+
+    /**
+     * Run `composer global remove`.  The project(s) specified may have been
+     * installed via cgr, or may have been installed
+     */
+    public function removeCommand($execPath, $composerArgs, $projects, $options)
+    {
+        $result = array();
         return $result;
     }
 
@@ -268,11 +309,11 @@ class Application
      * @param string $installLocation Location to install the project
      * @return CommandToExec
      */
-    public function globalRequireOne($command, $composerArgs, $projectWithVersion, $env, $installLocation)
+    public function buildGlobalRequireCommand($execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
     {
         $projectSpecificArgs = array("--working-dir=$installLocation", 'require', $projectWithVersion);
         $arguments = array_merge($composerArgs, $projectSpecificArgs);
-        return new CommandToExec($command, $arguments, $env, $installLocation);
+        return new CommandToExec($execPath, $arguments, $env, $installLocation);
     }
 
     /**

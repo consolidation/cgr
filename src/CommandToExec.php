@@ -7,7 +7,7 @@ namespace Consolidation\Cgr;
  */
 class CommandToExec
 {
-    protected $command;
+    protected $execPath;
     protected $arguments;
     protected $env;
     protected $dir;
@@ -15,9 +15,9 @@ class CommandToExec
     /**
      * Hold some command values to later exec
      */
-    public function __construct($command, $arguments, $env = array(), $dir = '')
+    public function __construct($execPath, $arguments, $env = array(), $dir = '')
     {
-        $this->command = $command;
+        $this->execPath = $execPath;
         $this->arguments = $arguments;
         $this->env = new Env($env);
         $this->dir = $dir;
@@ -31,7 +31,7 @@ class CommandToExec
         $escapedArgs = array_map(function ($item) {
             return escapeshellarg($item);
         }, $this->arguments);
-        return $this->command . ' ' . implode(' ', $escapedArgs);
+        return $this->execPath . ' ' . implode(' ', $escapedArgs);
     }
 
     /**

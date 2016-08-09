@@ -46,13 +46,13 @@ composer '--working-dir=/home/user/.composer/global/p/q' 'require' 'p/q:^3'
 composer '--working-dir=/home/user/.composer/global/d/e' 'require' 'd/e'
 EOT;
 
-        $argvGlobalUpdate = array(
+        $argvGlobalValidate = array(
             'composer',
             'global',
-            'update',
+            'validate',
         );
-        $expectedGlobalUpdate = <<< EOT
-composer 'global' 'update'
+        $expectedGlobalValidate = <<< EOT
+composer 'global' 'validate'
 EOT;
 
         $argvComposerInit = array(
@@ -71,8 +71,8 @@ EOT;
                 $expectedCgrMultipleProjectForms,
             ),
             array(
-                $argvGlobalUpdate,
-                $expectedGlobalUpdate,
+                $argvGlobalValidate,
+                $expectedGlobalValidate,
             ),
             array(
                 $argvComposerInit,
