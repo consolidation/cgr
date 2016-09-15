@@ -2,7 +2,7 @@
 
 Provide a safer alternative to `composer global require`.
 
-[![Build Status](https://travis-ci.org/consolidation-org/cgr.svg?branch=master)](https://travis-ci.org/consolidation-org/cgr) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/consolidation-org/cgr/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/consolidation-org/cgr/?branch=master) [![Coverage Status](https://coveralls.io/repos/github/consolidation-org/cgr/badge.svg?branch=master)](https://coveralls.io/github/consolidation-org/cgr?branch=master) [![License](https://poser.pugx.org/consolidation/cgr/license)](https://packagist.org/packages/consolidation/cgr)
+[![Build Status](https://travis-ci.org/consolidation/cgr.svg?branch=master)](https://travis-ci.org/consolidation/cgr) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/consolidation/cgr/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/consolidation/cgr/?branch=master) [![Coverage Status](https://coveralls.io/repos/github/consolidation/cgr/badge.svg?branch=master)](https://coveralls.io/github/consolidation/cgr?branch=master) [![License](https://poser.pugx.org/consolidation/cgr/license)](https://packagist.org/packages/consolidation/cgr)
 
 ## Component Status
 
