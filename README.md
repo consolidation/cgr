@@ -44,6 +44,18 @@ To configure cgr to install binaries to ~/bin, add the following to your ~/.bash
 
 You may select any directory you like for the `CGR_BIN_DIR`, as long as if is in your $PATH.
 
+## Updating and Removing
+
+To update a project that you installed with `cgr`, run:
+
+`cgr update drush/drush`
+
+Similarly, to remove a project:
+
+`cgr remove drush/drush`
+
+To update or remove cgr itself, run `composer global update consolidation/cgr` or `composer global remove cgr`.  Note that removing cgr has no effect on the commands you installed with cgr; they will remain installed and functional.
+
 ## Troubleshooting
 
 If you find that `cgr` is still behaving like a standard Composer `global require` command, double-check the settings of your $PATH variable, and use `which cgr` and `alias cgr` to deterime whether or not this script is being selected by your shell. It is possible that cgr may conflict with some other tool; for example, [the oh-my-zsh project defines a cgr alias](https://github.com/robbyrussell/oh-my-zsh/blob/0d45e771c8d3d1f7c465be465fcbdb4169141347/plugins/composer/composer.plugin.zsh#L46). If this is an issue for you, either `unalias cgr`, or perhaps add `alias cgrx="$HOME/.composer/vendor/bin/cgr"` to run this experimental tool as `cgrx`.
