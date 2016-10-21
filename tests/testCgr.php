@@ -55,13 +55,24 @@ composer '--working-dir={workdir}/.composer/global/p/q' 'require' 'p/q:^3'
 composer '--working-dir={workdir}/.composer/global/d/e' 'require' 'd/e'
 EOT;
 
-          $argvCgrRemove = array(
-              'cgr',
-              'remove',
-              'x/y',
-              'a/b',
-              'p/q',
-              'd/e',
+        $argvCgrWithMinimumStability = array(
+            'cgr',
+            'x/y:1.0',
+            '--stability',
+            'dev',
+        );
+        $expectedCgrWithMinimumStability = <<<EOT
+composer '--working-dir={workdir}/.composer/global/x/y' 'config' 'minimum-stability' 'dev'
+composer '--working-dir={workdir}/.composer/global/x/y' 'require' 'x/y:1.0'
+EOT;
+
+        $argvCgrRemove = array(
+            'cgr',
+            'remove',
+            'x/y',
+            'a/b',
+            'p/q',
+            'd/e',
           );
           $expectedCgrRemove = <<<EOT
 composer '--working-dir={workdir}/.composer/global/x/y' 'remove' 'x/y'
@@ -116,6 +127,10 @@ EOT;
             array(
                 $argvCgrMultipleProjectForms,
                 $expectedCgrMultipleProjectForms,
+            ),
+            array(
+                $argvCgrWithMinimumStability,
+                $expectedCgrWithMinimumStability,
             ),
             array(
                 $argvCgrRemove,
