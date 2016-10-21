@@ -46,6 +46,36 @@ composer '--working-dir=/home/user/.composer/global/p/q' 'require' 'p/q:^3'
 composer '--working-dir=/home/user/.composer/global/d/e' 'require' 'd/e'
 EOT;
 
+          $argvCgrRemove = array(
+              'cgr',
+              'remove',
+              'x/y',
+              'a/b',
+              'p/q',
+              'd/e',
+          );
+          $expectedCgrRemove = <<<EOT
+composer '--working-dir=/home/user/.composer/global/x/y' 'remove' 'x/y'
+composer '--working-dir=/home/user/.composer/global/a/b' 'remove' 'a/b'
+composer '--working-dir=/home/user/.composer/global/p/q' 'remove' 'p/q'
+composer '--working-dir=/home/user/.composer/global/d/e' 'remove' 'd/e'
+EOT;
+
+          $argvCgrUpdate = array(
+              'cgr',
+              'update',
+              'x/y',
+              'a/b',
+              'p/q',
+              'd/e',
+          );
+          $expectedCgrUpdate = <<<EOT
+composer '--working-dir=/home/user/.composer/global/x/y' 'update' 'x/y'
+composer '--working-dir=/home/user/.composer/global/a/b' 'update' 'a/b'
+composer '--working-dir=/home/user/.composer/global/p/q' 'update' 'p/q'
+composer '--working-dir=/home/user/.composer/global/d/e' 'update' 'd/e'
+EOT;
+
         $argvGlobalValidate = array(
             'composer',
             'global',
@@ -69,6 +99,14 @@ EOT;
             array(
                 $argvCgrMultipleProjectForms,
                 $expectedCgrMultipleProjectForms,
+            ),
+            array(
+                $argvCgrRemove,
+                $expectedCgrRemove,
+            ),
+            array(
+                $argvCgrUpdate,
+                $expectedCgrUpdate,
             ),
             array(
                 $argvGlobalValidate,

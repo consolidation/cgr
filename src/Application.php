@@ -98,7 +98,12 @@ class Application
         }
         // Call requireCommand, updateCommand, or removeCommand, as appropriate.
         $methodName = "{$command}Command";
-        return $this->$methodName($execPath, $composerArgs, $projects, $options);
+        if (function_exists($methodName)) {
+            return $this->$methodName($execPath, $composerArgs, $projects, $options);
+        } // If there is no specific implementation for the requested command, then call 'generalCommand'.
+        else {
+            return $this->generalCommand($command, $execPath, $composerArgs, $projects, $options);
+        }
     }
 
     /**
@@ -230,7 +235,8 @@ class Application
      * The binaries from each project will still be placed in the global
      * composer bin directory.
      *
-     * @param string $command The path to composer
+     * @param string $composerCommand The composer command to run e.g. require
+     * @param string $execPath The path to composer
      * @param array $composerArgs Anything from the global $argv to be passed
      *   on to Composer
      * @param array $projects A list of projects to install, with the key
@@ -239,7 +245,7 @@ class Application
      *   $optionDefaultValues in the main() function.
      * @return array
      */
-    public function requireCommand($execPath, $composerArgs, $projects, $options)
+    public function generalCommand($composerCommand, $execPath, $composerArgs, $projects, $options)
     {
         $globalBaseDir = $options['base-dir'];
         $binDir = $options['bin-dir'];
@@ -248,7 +254,7 @@ class Application
         foreach ($projects as $project => $version) {
             $installLocation = "$globalBaseDir/$project";
             $projectWithVersion = $this->projectWithVersion($project, $version);
-            $commandToExec = $this->buildGlobalRequireCommand($execPath, $composerArgs, $projectWithVersion, $env, $installLocation);
+            $commandToExec = $this->buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation);
             $result[] = $commandToExec;
         }
         return $result;
@@ -262,26 +268,15 @@ class Application
      * @param string $command The path to composer
      * @param array $composerArgs Anything from the global $argv to be passed
      *   on to Composer
-     * @param array $projects A list of projects to update. Must be empty
-     *   for now -- not supported yet (always updates all projects).
+     * @param array $projects A list of projects to update.
      * @param array $options User options from the command line; see
      *   $optionDefaultValues in the main() function.
      * @return array
      */
     public function updateCommand($execPath, $composerArgs, $projects, $options)
     {
-        $result = array();
-        return $result;
-    }
-
-    /**
-     * Run `composer global remove`.  The project(s) specified may have been
-     * installed via cgr, or may have been installed
-     */
-    public function removeCommand($execPath, $composerArgs, $projects, $options)
-    {
-        $result = array();
-        return $result;
+        // TODO: if projects are empty, make a list of everything currently installed
+        return $this->generalCommand('update', $execPath, $composerArgs, $projects, $options);
     }
 
     /**
@@ -309,9 +304,9 @@ class Application
      * @param string $installLocation Location to install the project
      * @return CommandToExec
      */
-    public function buildGlobalRequireCommand($execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
+    public function buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
     {
-        $projectSpecificArgs = array("--working-dir=$installLocation", 'require', $projectWithVersion);
+        $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand, $projectWithVersion);
         $arguments = array_merge($composerArgs, $projectSpecificArgs);
         return new CommandToExec($execPath, $arguments, $env, $installLocation);
     }
