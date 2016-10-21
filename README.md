@@ -6,7 +6,7 @@ Provide a safer alternative to `composer global require`.
 
 ## Component Status
 
-Still new; code coverage is good, but only lightly used in real-world environments.
+Cgr has been used in real-world environments for several months with no reported problems; however, see 'Limitations', below.
 
 ## Motivation
 
@@ -67,6 +67,8 @@ If you find that `cgr` is still behaving like a standard Composer `global requir
 ## Limitations
 
 Composer will also load Composer Plugins from the "global" Composer project. This is rare; however, if you would like to install a Composer Installer globally, then you must use the `composer global require` command directly. The cgr script isolates the projects it installs from each other to avoid potential conflicts between dependencies; this isolation also makes any Composer Plugins unavailable in the global context.
+
+Cgr cannot be used to install components that require non-stable dependencies.
 
 ## Alternative Solutions
 
