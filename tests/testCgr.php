@@ -29,6 +29,15 @@ class CgrTests extends \PHPUnit_Framework_TestCase
         static::fileDeleteRecursive(static::$tempDir);
     }
 
+    function createFixtures()
+    {
+        mkdir($this->workDir . '/.composer');
+        mkdir($this->workDir . '/.composer/global');
+        mkdir($this->workDir . '/.composer/global/testorg');
+        mkdir($this->workDir . '/.composer/global/testorg/testproject');
+        file_put_contents($this->workDir . '/.composer/global/testorg/testproject/composer.json', '{}');
+    }
+
     public function testApplicationCommandStringsValues()
     {
         $argvCgrMultipleProjectForms = array(
@@ -40,10 +49,10 @@ class CgrTests extends \PHPUnit_Framework_TestCase
             'd/e',
         );
         $expectedCgrMultipleProjectForms = <<< EOT
-composer '--working-dir=/home/user/.composer/global/x/y' 'require' 'x/y:1.0'
-composer '--working-dir=/home/user/.composer/global/a/b' 'require' 'a/b:~2'
-composer '--working-dir=/home/user/.composer/global/p/q' 'require' 'p/q:^3'
-composer '--working-dir=/home/user/.composer/global/d/e' 'require' 'd/e'
+composer '--working-dir={workdir}/.composer/global/x/y' 'require' 'x/y:1.0'
+composer '--working-dir={workdir}/.composer/global/a/b' 'require' 'a/b:~2'
+composer '--working-dir={workdir}/.composer/global/p/q' 'require' 'p/q:^3'
+composer '--working-dir={workdir}/.composer/global/d/e' 'require' 'd/e'
 EOT;
 
           $argvCgrRemove = array(
@@ -55,10 +64,10 @@ EOT;
               'd/e',
           );
           $expectedCgrRemove = <<<EOT
-composer '--working-dir=/home/user/.composer/global/x/y' 'remove' 'x/y'
-composer '--working-dir=/home/user/.composer/global/a/b' 'remove' 'a/b'
-composer '--working-dir=/home/user/.composer/global/p/q' 'remove' 'p/q'
-composer '--working-dir=/home/user/.composer/global/d/e' 'remove' 'd/e'
+composer '--working-dir={workdir}/.composer/global/x/y' 'remove' 'x/y'
+composer '--working-dir={workdir}/.composer/global/a/b' 'remove' 'a/b'
+composer '--working-dir={workdir}/.composer/global/p/q' 'remove' 'p/q'
+composer '--working-dir={workdir}/.composer/global/d/e' 'remove' 'd/e'
 EOT;
 
           $argvCgrUpdate = array(
@@ -70,10 +79,18 @@ EOT;
               'd/e',
           );
           $expectedCgrUpdate = <<<EOT
-composer '--working-dir=/home/user/.composer/global/x/y' 'update' 'x/y'
-composer '--working-dir=/home/user/.composer/global/a/b' 'update' 'a/b'
-composer '--working-dir=/home/user/.composer/global/p/q' 'update' 'p/q'
-composer '--working-dir=/home/user/.composer/global/d/e' 'update' 'd/e'
+composer '--working-dir={workdir}/.composer/global/x/y' 'update' 'x/y'
+composer '--working-dir={workdir}/.composer/global/a/b' 'update' 'a/b'
+composer '--working-dir={workdir}/.composer/global/p/q' 'update' 'p/q'
+composer '--working-dir={workdir}/.composer/global/d/e' 'update' 'd/e'
+EOT;
+
+          $argvCgrUpdateWithoutArgs = array(
+              'cgr',
+              'update',
+          );
+          $expectedCgrUpdateWithoutArgs = <<<EOT
+composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'update' 'testorg/testproject'
 EOT;
 
         $argvGlobalValidate = array(
@@ -109,6 +126,10 @@ EOT;
                 $expectedCgrUpdate,
             ),
             array(
+                $argvCgrUpdateWithoutArgs,
+                $expectedCgrUpdateWithoutArgs,
+            ),
+            array(
                 $argvGlobalValidate,
                 $expectedGlobalValidate,
             ),
@@ -117,6 +138,17 @@ EOT;
                 $expectedComposerInit,
             ),
         );
+    }
+
+    public function testFixtures()
+    {
+        $this->createFixtures();
+        $directories = FileSystemUtils::listDirectories($this->workDir . '/.composer/global');
+        $this->assertEquals('testorg', implode(',', $directories));
+        $directories = FileSystemUtils::listDirectories($this->workDir . '/.composer/global/testorg');
+        $this->assertEquals('testproject', implode(',', $directories));
+        $projects = FileSystemUtils::allInstalledProjectsInBaseDir($this->workDir . '/.composer/global');
+        $this->assertEquals('testorg/testproject', implode(',', $projects));
     }
 
     /**
@@ -128,12 +160,15 @@ EOT;
      */
     public function testApplicationCommandStrings($argv, $expected)
     {
-        $commandList = $this->application->parseArgvAndGetCommandList($argv, '/home/user');
+        $this->createFixtures();
+        $home = $this->workDir;
+        $commandList = $this->application->parseArgvAndGetCommandList($argv, $home);
         $commandStrings = array();
         foreach ($commandList as $command) {
             $commandStrings[] = $command->getCommandString();
         }
         $actual = implode("\n", $commandStrings);
+        $actual = str_replace($this->workDir, '{workdir}', $actual);
         $this->assertEquals($expected, $actual);
     }
 
@@ -224,7 +259,8 @@ EOT;
         $origEnv->apply();
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
         $output = file_get_contents($this->workDir . '/output.txt');
-        $expected = str_replace('{workdir}', $this->workDir, $expected);
+        $output = str_replace($this->workDir, '{workdir}', $output);
+        //$expected = str_replace('{workdir}', $this->workDir, $expected);
         $this->assertEquals($expected, rtrim($output));
     }
 

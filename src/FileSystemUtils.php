@@ -38,4 +38,57 @@ class FileSystemUtils
             return mkdir($path);
         }
     }
+
+    /**
+     * Return all of the directories in a given directory
+     *
+     * @param string $d directory to scann
+     * @return string[]
+     */
+    public static function listDirectories($d)
+    {
+        return array_filter(scandir($d), function ($f) use ($d) {
+            return is_dir($d . DIRECTORY_SEPARATOR . $f) && ($f[0] != '.');
+        });
+    }
+
+
+    /**
+     * Find all installed projects in the global 'base-dir'.
+     *
+     * @param string $globalBaseDir
+     * @return string[]
+     */
+    public static function allInstalledProjectsInBaseDir($globalBaseDir)
+    {
+        $projects = array();
+
+        $orgs = static::listDirectories($globalBaseDir);
+        foreach ($orgs as $org) {
+            $projects = array_merge($projects, static::allInstalledProjectsInOneOrg($globalBaseDir, $org));
+        }
+
+        return $projects;
+    }
+
+    /**
+     * Find all installed projects in one organization dir.
+     *
+     * @param string $globalOrgDir
+     * @return string[]
+     */
+    protected static function allInstalledProjectsInOneOrg($globalBaseDir, $org)
+    {
+        $globalOrgDir = "$globalBaseDir/$org";
+        $projects = array();
+
+        $projectDirs = static::listDirectories($globalOrgDir);
+        foreach ($projectDirs as $projectDir) {
+            if (is_file("$globalOrgDir/$projectDir/composer.json")) {
+                $projects[] = "$org/$projectDir";
+            }
+        }
+
+        return $projects;
+    }
 }

@@ -41,6 +41,7 @@ class CommandToExec
     public function run($stdoutFile = '')
     {
         $commandString = $this->getCommandString();
+        // print ">> $commandString\n";
         $origEnv = $this->env->apply($this->env);
         $origDir = FileSystemUtils::applyDir($this->dir);
         $exitCode = static::runCommand($commandString, $stdoutFile);

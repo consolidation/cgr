@@ -20,6 +20,9 @@ class Application
 
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
         $commandList = $this->separateProjectAndGetCommandList($argv, $home, $options);
+        if (empty($commandList)) {
+            return 1;
+        }
         return $this->runCommandList($commandList, $options);
     }
 
@@ -98,10 +101,10 @@ class Application
         }
         // Call requireCommand, updateCommand, or removeCommand, as appropriate.
         $methodName = "{$command}Command";
-        if (function_exists($methodName)) {
+        if (method_exists($this, $methodName)) {
             return $this->$methodName($execPath, $composerArgs, $projects, $options);
-        } // If there is no specific implementation for the requested command, then call 'generalCommand'.
-        else {
+        } else {
+            // If there is no specific implementation for the requested command, then call 'generalCommand'.
             return $this->generalCommand($command, $execPath, $composerArgs, $projects, $options);
         }
     }
@@ -275,8 +278,26 @@ class Application
      */
     public function updateCommand($execPath, $composerArgs, $projects, $options)
     {
-        // TODO: if projects are empty, make a list of everything currently installed
+        // If 'projects' list is empty, make a list of everything currently installed
+        if (empty($projects)) {
+            $projects = FileSystemUtils::allInstalledProjectsInBaseDir($options['base-dir']);
+            $projects = $this->flipProjectsArray($projects);
+        }
         return $this->generalCommand('update', $execPath, $composerArgs, $projects, $options);
+    }
+
+    /**
+     * Convert from an array of projects to an array where the key is the
+     * project name, and the value (version) is an empty string.
+     *
+     * @param string[] $projects
+     * @return array
+     */
+    public function flipProjectsArray($projects)
+    {
+        return array_map(function () {
+            return '';
+        }, array_flip($projects));
     }
 
     /**
