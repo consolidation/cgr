@@ -50,7 +50,11 @@ To update a project that you installed with `cgr`, run:
 
 `cgr update drush/drush`
 
-Similarly, to remove a project:
+To update everything installed by `cgr`, run:
+
+`cgr update`
+
+To remove a project:
 
 `cgr remove drush/drush`
 
