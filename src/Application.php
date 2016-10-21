@@ -390,7 +390,7 @@ class Application
     /**
      * Generate command string to call `composer config KEY VALUE` to install one project.
      *
-     * @param string $command The path to composer
+     * @param string $execPath The path to composer
      * @param array $composerArgs The arguments to pass to composer
      * @param string $key The config item to set
      * @param string $value The value to set the config item to
