@@ -30,6 +30,10 @@ Example:
 
 `cgr drush/drush`
 
+Unlike the composer global require command, it is possible using cgr to set the minimum stability for a project before installing it.  This is done in the same way as the `composer create-project` command:
+
+`cgr --stability RC pantheon-systems/terminus 1.0.0-alpha2`
+
 The behavior of the cgr script can be customized with commandline options and environment variables.
 
 Option           | Environment Variable | Description
@@ -67,8 +71,6 @@ If you find that `cgr` is still behaving like a standard Composer `global requir
 ## Limitations
 
 Composer will also load Composer Plugins from the "global" Composer project. This is rare; however, if you would like to install a Composer Installer globally, then you must use the `composer global require` command directly. The cgr script isolates the projects it installs from each other to avoid potential conflicts between dependencies; this isolation also makes any Composer Plugins unavailable in the global context.
-
-Cgr cannot be used to install components that require non-stable dependencies.
 
 ## Alternative Solutions
 
