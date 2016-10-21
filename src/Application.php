@@ -122,6 +122,7 @@ class Application
             'composer-path' => 'composer',
             'base-dir' => "$home/.composer/global",
             'bin-dir' => "$home/.composer/vendor/bin",
+            'stability' => false,
         );
     }
 
@@ -238,6 +239,28 @@ class Application
      * The binaries from each project will still be placed in the global
      * composer bin directory.
      *
+     * @param string $execPath The path to composer
+     * @param array $composerArgs Anything from the global $argv to be passed
+     *   on to Composer
+     * @param array $projects A list of projects to install, with the key
+     *   specifying the project name, and the value specifying its version.
+     * @param array $options User options from the command line; see
+     *   $optionDefaultValues in the main() function.
+     * @return array
+     */
+    public function requireCommand($execPath, $composerArgs, $projects, $options)
+    {
+        $stabilityCommands = array();
+        if ($options['stability']) {
+            $stabilityCommands = $this->configureProjectStability($execPath, $composerArgs, $projects, $options);
+        }
+        $requireCommands = $this->generalCommand('require', $execPath, $composerArgs, $projects, $options);
+        return array_merge($stabilityCommands, $requireCommands);
+    }
+
+    /**
+     * General command handler.
+     *
      * @param string $composerCommand The composer command to run e.g. require
      * @param string $execPath The path to composer
      * @param array $composerArgs Anything from the global $argv to be passed
@@ -260,6 +283,38 @@ class Application
             $commandToExec = $this->buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation);
             $result[] = $commandToExec;
         }
+        return $result;
+    }
+
+    /**
+     * If --stability VALUE is provided, then run a `composer config minimum-stability VALUE`
+     * command to configure composer.json appropriately.
+     *
+     * @param string $execPath The path to composer
+     * @param array $composerArgs Anything from the global $argv to be passed
+     *   on to Composer
+     * @param array $projects A list of projects to install, with the key
+     *   specifying the project name, and the value specifying its version.
+     * @param array $options User options from the command line; see
+     *   $optionDefaultValues in the main() function.
+     * @return array
+     */
+    public function configureProjectStability($execPath, $composerArgs, $projects, $options)
+    {
+        $globalBaseDir = $options['base-dir'];
+        $stability = $options['stability'];
+        $result = array();
+        $env = array();
+
+        foreach ($projects as $project => $version) {
+            $installLocation = "$globalBaseDir/$project";
+            FileSystemUtils::mkdirParents($installLocation);
+            if (!file_exists("$installLocation/composer.json")) {
+                file_put_contents("$installLocation/composer.json", '{}');
+            }
+            $result[] = $this->buildConfigCommand($execPath, $composerArgs, 'minimum-stability', $stability, $env, $installLocation);
+        }
+
         return $result;
     }
 
@@ -316,7 +371,7 @@ class Application
     }
 
     /**
-     * Generate command string to call `composer require` to install one project.
+     * Generate command string to call `composer COMMAND` to install one project.
      *
      * @param string $command The path to composer
      * @param array $composerArgs The arguments to pass to composer
@@ -328,6 +383,24 @@ class Application
     public function buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
     {
         $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand, $projectWithVersion);
+        $arguments = array_merge($composerArgs, $projectSpecificArgs);
+        return new CommandToExec($execPath, $arguments, $env, $installLocation);
+    }
+
+    /**
+     * Generate command string to call `composer config KEY VALUE` to install one project.
+     *
+     * @param string $command The path to composer
+     * @param array $composerArgs The arguments to pass to composer
+     * @param string $key The config item to set
+     * @param string $value The value to set the config item to
+     * @param array $env Environment to set prior to exec
+     * @param string $installLocation Location to install the project
+     * @return CommandToExec
+     */
+    public function buildConfigCommand($execPath, $composerArgs, $key, $value, $env, $installLocation)
+    {
+        $projectSpecificArgs = array("--working-dir=$installLocation", 'config', $key, $value);
         $arguments = array_merge($composerArgs, $projectSpecificArgs);
         return new CommandToExec($execPath, $arguments, $env, $installLocation);
     }
