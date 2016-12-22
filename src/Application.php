@@ -2,6 +2,16 @@
 
 namespace Consolidation\Cgr;
 
+/**
+ * Note that this command is deliberately written using only php-native
+ * libraries, and no external dependencies whatsoever, so that it may
+ * be installed via `composer global require` without causing any conflicts
+ * with any other project.
+ *
+ * This technique is NOT recommended for other tools. Use Symfony Console
+ * directly, or, better yet, use Robo (http://robo.li) as a framework.
+ * See: http://robo.li/framework/
+ */
 class Application
 {
     protected $outputFile = '';
@@ -19,11 +29,49 @@ class Application
         $optionDefaultValues = $this->overlayEnvironmentValues($optionDefaultValues);
 
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
+
+        if (reset($argv) == 'help') {
+            $this->help($argv);
+            return 0;
+        }
+
         $commandList = $this->separateProjectAndGetCommandList($argv, $home, $options);
         if (empty($commandList)) {
             return 1;
         }
         return $this->runCommandList($commandList, $options);
+    }
+
+    public function help($argv)
+    {
+        // Future: support 'help <command>'?
+        print <<<EOT
+The 'cgr' tool is a "safer" alternative to 'composer global require'.
+Installing projects with cgr helps avoid dependency conflicts between
+different tools.  Use 'cgr' wherever 'composer global require' is recommended.
+
+Examples:
+
+Install a project:
+------------------
+$ cgr drush/drush
+
+Update a project:
+-----------------
+$ cgr update drush/drush
+
+Update all projects installed via 'cgr':
+----------------------------------------
+$ cgr update
+
+Remove a project:
+-----------------
+$ cgr remove drush/drush
+
+For more information, see: https://github.com/consolidation/cgr
+
+
+EOT;
     }
 
     /**
@@ -54,6 +102,13 @@ class Application
     public function separateProjectAndGetCommandList($argv, $home, $options)
     {
         list($command, $projects, $composerArgs) = $this->separateProjectsFromArgs($argv, $options);
+
+        // If command was unknown, then exit with an error message
+        if (empty($command)) {
+            print "Unknown command: " . implode(' ', $composerArgs) . "\n";
+            exit(1);
+        }
+
         $commandList = $this->getCommandsToExec($command, $composerArgs, $projects, $options);
         return $commandList;
     }
@@ -93,12 +148,7 @@ class Application
     public function getCommandsToExec($command, $composerArgs, $projects, $options)
     {
         $execPath = $options['composer-path'];
-        // If command was not 'global require', 'global update' or
-        // 'global remove', then call through to the standard composer
-        // with all of the original args.
-        if (empty($command)) {
-            return array(new CommandToExec($execPath, $composerArgs));
-        }
+
         // Call requireCommand, updateCommand, or removeCommand, as appropriate.
         $methodName = "{$command}Command";
         if (method_exists($this, $methodName)) {
@@ -413,6 +463,10 @@ class Application
      */
     public function isComposerVersion($arg)
     {
+        // Allow for 'dev-master', et. al.
+        if (substr($arg, 0, 4) == 'dev-') {
+            return true;
+        }
         $specialVersionChars = array('^', '~', '<', '>');
         return is_numeric($arg[0]) || in_array($arg[0], $specialVersionChars);
     }

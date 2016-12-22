@@ -47,12 +47,15 @@ class CgrTests extends \PHPUnit_Framework_TestCase
             'p/q',
             '^3',
             'd/e',
+            'f/g',
+            'dev-master',
         );
         $expectedCgrMultipleProjectForms = <<< EOT
 composer '--working-dir={workdir}/.composer/global/x/y' 'require' 'x/y:1.0'
 composer '--working-dir={workdir}/.composer/global/a/b' 'require' 'a/b:~2'
 composer '--working-dir={workdir}/.composer/global/p/q' 'require' 'p/q:^3'
 composer '--working-dir={workdir}/.composer/global/d/e' 'require' 'd/e'
+composer '--working-dir={workdir}/.composer/global/f/g' 'require' 'f/g:dev-master'
 EOT;
 
         $argvCgrWithMinimumStability = array(
@@ -104,25 +107,6 @@ EOT;
 composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'update' 'testorg/testproject'
 EOT;
 
-        $argvGlobalValidate = array(
-            'composer',
-            'global',
-            'validate',
-        );
-        $expectedGlobalValidate = <<< EOT
-composer 'global' 'validate'
-EOT;
-
-        $argvComposerInit = array(
-            'composer',
-            'init',
-            "--name=test/test",
-            '--no-interaction',
-        );
-        $expectedComposerInit = <<< EOT
-composer 'init' '--name=test/test' '--no-interaction'
-EOT;
-
         return array(
             array(
                 $argvCgrMultipleProjectForms,
@@ -143,14 +127,6 @@ EOT;
             array(
                 $argvCgrUpdateWithoutArgs,
                 $expectedCgrUpdateWithoutArgs,
-            ),
-            array(
-                $argvGlobalValidate,
-                $expectedGlobalValidate,
-            ),
-            array(
-                $argvComposerInit,
-                $expectedComposerInit,
             ),
         );
     }
@@ -299,37 +275,6 @@ EOT;
         $this->assertFileExists($this->workDir . '/.composer/global/consolidation/cgr/composer.json', 'composer.json created');
         $composerJson = file_get_contents($this->workDir . '/.composer/global/consolidation/cgr/composer.json');
         $this->assertContains('"consolidation/cgr": "1.0"', $composerJson);
-    }
-    /**
-     * Functional test with the real composer executable.  Use cgr to
-     * require cgr, although we do so with --no-update to avoid pointlessly
-     * downloading files we do not actually need.  We therefore only
-     * test to see whether the `composer.json` file is correctly updated;
-     * we cannot test to see if the cgr binary is correctly installed
-     * in the appropriate bin directory, as this step is not done.
-     */
-    public function testApplicationWithComposerPassthruCommand()
-    {
-        $argv = array(
-            'composer',
-            'init',
-            "--name=test/test",
-            '--no-interaction',
-            '--working-dir=' . $this->workDir,
-        );
-        $this->application->setOutputFile($this->workDir . '/output.txt');
-        $exitCode = $this->application->run($argv, $this->workDir);
-        $this->assertEquals(0, $exitCode);
-        $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
-        $this->assertFileExists($this->workDir . '/composer.json', 'composer.json created');
-        $composerJson = file_get_contents($this->workDir . '/composer.json');
-        $expected = <<<EOT
-{
-    "name": "test/test",
-    "require": {}
-}
-EOT;
-        $this->assertEquals($expected, rtrim($composerJson));
     }
 
     static function tempdir($baseDir = false, $prefix = '')
