@@ -56,6 +56,14 @@ Install a project:
 ------------------
 $ cgr drush/drush
 
+Display the info of a project:
+-----------------------------
+$ cgr info drush/drush
+
+Display the info of all projects installed via 'cgr':
+----------------------------------------------------
+$ cgr info
+
 Update a project:
 -----------------
 $ cgr update drush/drush
@@ -236,7 +244,7 @@ EOT;
      */
     public function separateProjectsFromArgs($argv, $options)
     {
-        $cgrCommands = array('require', 'update', 'remove');
+        $cgrCommands = array('info', 'require', 'update', 'remove');
         $command = 'require';
         $composerArgs = array();
         $projects = array();
@@ -367,6 +375,30 @@ EOT;
 
         return $result;
     }
+
+    /**
+     * Run `composer info`. Not only do we want to display the information of
+     * the "global" Composer project, we also want to get the infomation of
+     * all the "isolated" projects installed via cgr in ~/.composer/global.
+     *
+     * @param string $command The path to composer
+     * @param array $composerArgs Anything from the global $argv to be passed
+     *   on to Composer
+     * @param array $projects A list of projects to update.
+     * @param array $options User options from the command line; see
+     *   $optionDefaultValues in the main() function.
+     * @return array
+     */
+    public function infoCommand($execPath, $composerArgs, $projects, $options)
+    {
+        // If 'projects' list is empty, make a list of everything currently installed
+        if (empty($projects)) {
+            $projects = FileSystemUtils::allInstalledProjectsInBaseDir($options['base-dir']);
+            $projects = $this->flipProjectsArray($projects);
+        }
+        return $this->generalCommand('info', $execPath, $composerArgs, $projects, $options);
+    }
+
 
     /**
      * Run `composer global update`. Not only do we want to update the

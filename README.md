@@ -48,6 +48,16 @@ To configure cgr to install binaries to ~/bin, add the following to your ~/.bash
 
 You may select any directory you like for the `CGR_BIN_DIR`, as long as if is in your $PATH.
 
+## Display information
+
+To display the information of a project, run:
+
+`cgr info drush/drush`
+
+To display the information of all projects installed via 'cgr', run:
+
+`cgr info`
+
 ## Updating and Removing
 
 To update a project that you installed with `cgr`, run:
