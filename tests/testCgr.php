@@ -107,6 +107,29 @@ EOT;
 composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'update' 'testorg/testproject'
 EOT;
 
+          $argvCgrInfo = array(
+              'cgr',
+              'info',
+              'x/y',
+              'a/b',
+              'p/q',
+              'd/e',
+          );
+          $expectedCgrInfo = <<<EOT
+composer '--working-dir={workdir}/.composer/global/x/y' 'info' 'x/y'
+composer '--working-dir={workdir}/.composer/global/a/b' 'info' 'a/b'
+composer '--working-dir={workdir}/.composer/global/p/q' 'info' 'p/q'
+composer '--working-dir={workdir}/.composer/global/d/e' 'info' 'd/e'
+EOT;
+
+          $argvCgrInfoWithoutArgs = array(
+              'cgr',
+              'info',
+          );
+          $expectedCgrInfoWithoutArgs = <<<EOT
+composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'info' 'testorg/testproject'
+EOT;
+
         return array(
             array(
                 $argvCgrMultipleProjectForms,
@@ -127,6 +150,14 @@ EOT;
             array(
                 $argvCgrUpdateWithoutArgs,
                 $expectedCgrUpdateWithoutArgs,
+            ),
+            array(
+                $argvCgrInfo,
+                $expectedCgrInfo,
+            ),
+            array(
+                $argvCgrInfoWithoutArgs,
+                $expectedCgrInfoWithoutArgs,
             ),
         );
     }
