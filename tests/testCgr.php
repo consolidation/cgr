@@ -19,6 +19,11 @@ class CgrTests extends \PHPUnit_Framework_TestCase
         chdir($this->workDir);
     }
 
+    function composerHome()
+    {
+        return $this->workDir . '/.composer';
+    }
+
     function tearDown()
     {
         static::fileDeleteRecursive($this->workDir);
@@ -31,11 +36,11 @@ class CgrTests extends \PHPUnit_Framework_TestCase
 
     function createFixtures()
     {
-        mkdir($this->workDir . '/.composer');
-        mkdir($this->workDir . '/.composer/global');
-        mkdir($this->workDir . '/.composer/global/testorg');
-        mkdir($this->workDir . '/.composer/global/testorg/testproject');
-        file_put_contents($this->workDir . '/.composer/global/testorg/testproject/composer.json', '{}');
+        mkdir($this->composerHome());
+        mkdir($this->composerHome() . '/global');
+        mkdir($this->composerHome() . '/global/testorg');
+        mkdir($this->composerHome() . '/global/testorg/testproject');
+        file_put_contents($this->composerHome() . '/global/testorg/testproject/composer.json', '{}');
     }
 
     public function testApplicationCommandStringsValues()
@@ -165,11 +170,11 @@ EOT;
     public function testFixtures()
     {
         $this->createFixtures();
-        $directories = FileSystemUtils::listDirectories($this->workDir . '/.composer/global');
+        $directories = FileSystemUtils::listDirectories($this->composerHome() . '/global');
         $this->assertEquals('testorg', implode(',', $directories));
-        $directories = FileSystemUtils::listDirectories($this->workDir . '/.composer/global/testorg');
+        $directories = FileSystemUtils::listDirectories($this->composerHome() . '/global/testorg');
         $this->assertEquals('testproject', implode(',', $directories));
-        $projects = FileSystemUtils::allInstalledProjectsInBaseDir($this->workDir . '/.composer/global');
+        $projects = FileSystemUtils::allInstalledProjectsInBaseDir($this->composerHome() . '/global');
         $this->assertEquals('testorg/testproject', implode(',', $projects));
     }
 
@@ -183,7 +188,7 @@ EOT;
     public function testApplicationCommandStrings($argv, $expected)
     {
         $this->createFixtures();
-        $home = $this->workDir;
+        $home = $this->composerHome();
         $commandList = $this->application->parseArgvAndGetCommandList($argv, $home);
         $commandStrings = array();
         foreach ($commandList as $command) {
@@ -277,7 +282,7 @@ EOT;
 
         $env = new Env($envArray);
         $origEnv = $env->apply();
-        $exitCode = $this->application->run($argv, $this->workDir);
+        $exitCode = $this->application->run($argv, $this->composerHome());
         $origEnv->apply();
         $this->assertFileExists($this->workDir . '/output.txt', 'Output file created.');
         $output = file_get_contents($this->workDir . '/output.txt');
@@ -301,10 +306,10 @@ EOT;
             '--no-update',
             'consolidation/cgr:1.0',
         );
-        $exitCode = $this->application->run($argv, $this->workDir);
+        $exitCode = $this->application->run($argv, $this->composerHome());
         $this->assertEquals(0, $exitCode);
-        $this->assertFileExists($this->workDir . '/.composer/global/consolidation/cgr/composer.json', 'composer.json created');
-        $composerJson = file_get_contents($this->workDir . '/.composer/global/consolidation/cgr/composer.json');
+        $this->assertFileExists($this->composerHome() . '/global/consolidation/cgr/composer.json', 'composer.json created');
+        $composerJson = file_get_contents($this->composerHome() . '/global/consolidation/cgr/composer.json');
         $this->assertContains('"consolidation/cgr": "1.0"', $composerJson);
     }
 
