@@ -20,7 +20,7 @@ class Application
      * Run the cgr tool, a safer alternative to `composer global require`.
      *
      * @param array $argv The global $argv array passed in by PHP
-     * @param string $home The path to the user's home directory
+     * @param string $home The path to the composer home directory
      * @return integer
      */
     public function run($argv, $home)
@@ -170,7 +170,7 @@ EOT;
     /**
      * Return our list of default option values, with paths relative to
      * the provided home directory.
-     * @param string $home The user's home directory
+     * @param string $home The composer home directory
      * @return array
      */
     public function getDefaultOptionValues($home)
@@ -178,8 +178,8 @@ EOT;
         return array(
             'composer' => false,
             'composer-path' => 'composer',
-            'base-dir' => "$home/.composer/global",
-            'bin-dir' => "$home/.composer/vendor/bin",
+            'base-dir' => "$home/global",
+            'bin-dir' => "$home/vendor/bin",
             'stability' => false,
         );
     }

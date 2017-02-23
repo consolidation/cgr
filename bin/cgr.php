@@ -2,7 +2,10 @@
 
 function main($argv)
 {
-    $home = getenv("HOME");
+    $home = getenv("COMPOSER_HOME");
+    if (empty($some)) {
+        $home = getenv("HOME") . '/.composer';
+    }
     $appRoot = dirname(__DIR__);
 
     if (file_exists($appRoot.'/vendor/autoload.php')) {
