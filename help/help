@@ -1,0 +1,32 @@
+The 'cgr' tool is a "safer" alternative to 'composer global require'.
+Installing projects with cgr helps avoid dependency conflicts between
+different tools.  Use 'cgr' wherever 'composer global require' is recommended.
+
+Examples:
+
+Install a project:
+------------------
+$ cgr drush/drush
+
+Display the info of a project:
+-----------------------------
+$ cgr info drush/drush
+
+Display the info of all projects installed via 'cgr':
+----------------------------------------------------
+$ cgr info
+
+Update a project:
+-----------------
+$ cgr update drush/drush
+
+Update all projects installed via 'cgr':
+----------------------------------------
+$ cgr update
+
+Remove a project:
+-----------------
+$ cgr remove drush/drush
+
+For more information, see: https://github.com/consolidation/cgr
+
