@@ -18,6 +18,12 @@
         "satooshi/php-coveralls": "^1.0",
         "squizlabs/php_codesniffer": "2.*"
     },
+    "scripts": {
+        "test": [ "@phpunit", "@cs" ],
+        "phpunit": "phpunit --colors=always",
+        "cs": "phpcs --standard=PSR2 -n src",
+        "cbf": "phpcbf --standard=PSR2 -n src"
+    },
     "bin": ["bin/cgr"],
     "autoload": {
         "psr-4": {"Consolidation\\Cgr\\": "src"}

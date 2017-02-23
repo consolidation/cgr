@@ -30,9 +30,9 @@ class Application
 
         list($argv, $options) = $this->parseOutOurOptions($argv, $optionDefaultValues);
 
-        if (reset($argv) == 'help') {
-            $this->help($argv);
-            return 0;
+        $helpArg = $this->getHelpArgValue($argv);
+        if (!empty($helpArg)) {
+            return $this->help($helpArg);
         }
 
         $commandList = $this->separateProjectAndGetCommandList($argv, $home, $options);
@@ -42,44 +42,47 @@ class Application
         return $this->runCommandList($commandList, $options);
     }
 
-    public function help($argv)
+    /**
+     * Returns the first argument after `help`, or the
+     * first argument if `--help` is present. Otherwise,
+     * returns an empty string.
+     */
+    public function getHelpArgValue($argv)
     {
-        // Future: support 'help <command>'?
-        print <<<EOT
-The 'cgr' tool is a "safer" alternative to 'composer global require'.
-Installing projects with cgr helps avoid dependency conflicts between
-different tools.  Use 'cgr' wherever 'composer global require' is recommended.
+        $hasHelp = false;
+        $helpArg = '';
 
-Examples:
+        foreach ($argv as $arg) {
+            if (($arg == 'help') || ($arg == '--help') || ($arg == '-h')) {
+                $hasHelp = true;
+            } elseif (($arg[0] != '-') && empty($helpArg)) {
+                $helpArg = $arg;
+            }
+        }
 
-Install a project:
-------------------
-$ cgr drush/drush
+        if (!$hasHelp) {
+            return false;
+        }
 
-Display the info of a project:
------------------------------
-$ cgr info drush/drush
+        if (empty($helpArg)) {
+            return 'help';
+        }
 
-Display the info of all projects installed via 'cgr':
-----------------------------------------------------
-$ cgr info
+        return $helpArg;
+    }
 
-Update a project:
------------------
-$ cgr update drush/drush
+    public function help($helpArg)
+    {
+        $helpFile = dirname(__DIR__) . '/help/' . $helpArg;
 
-Update all projects installed via 'cgr':
-----------------------------------------
-$ cgr update
+        if (!file_exists($helpFile)) {
+            print "No help available for '$helpArg'\n";
+            return 1;
+        }
 
-Remove a project:
------------------
-$ cgr remove drush/drush
-
-For more information, see: https://github.com/consolidation/cgr
-
-
-EOT;
+        $helpContents = file_get_contents($helpFile);
+        print $helpContents;
+        return 0;
     }
 
     /**
