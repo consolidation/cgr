@@ -3,7 +3,7 @@
 function main($argv)
 {
     $home = getenv("COMPOSER_HOME");
-    if (empty($some)) {
+    if (empty($home)) {
         $home = getenv("HOME") . '/.composer';
     }
     $appRoot = dirname(__DIR__);
