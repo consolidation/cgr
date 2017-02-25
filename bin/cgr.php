@@ -2,10 +2,6 @@
 
 function main($argv)
 {
-    $home = getenv("COMPOSER_HOME");
-    if (empty($home)) {
-        $home = getenv("HOME") . '/.composer';
-    }
     $appRoot = dirname(__DIR__);
 
     if (file_exists($appRoot.'/vendor/autoload.php')) {
@@ -16,6 +12,9 @@ function main($argv)
         echo 'Could not find autoloader; try running `composer install`.'.PHP_EOL;
         exit(1);
     }
+
+    // Find the home directory
+    $home = \Consolidation\Cgr\SystemInformation::getHomeDir();
 
     $app = new \Consolidation\Cgr\Application();
     return $app->run($argv, $home);
