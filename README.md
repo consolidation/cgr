@@ -42,6 +42,8 @@ Option           | Environment Variable | Description
 --base-dir       | CGR_BASE_DIR         | Where to store "global" projects.
 --bin-dir        | CGR_BIN_DIR          | Where to install project binaries.
 
+If these variables are not defined, then cgr uses the value of the `COMPOSER_HOME` environment variable as the base directory to use as described in the [Composer documentation on environment variables](https://getcomposer.org/doc/03-cli.md#composer-home).
+
 To configure cgr to install binaries to ~/bin, add the following to your ~/.bashrc file:
 
 `export CGR_BIN_DIR=$HOME/bin`
