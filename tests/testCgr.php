@@ -98,10 +98,10 @@ EOT;
               'd/e',
           );
           $expectedCgrUpdate = <<<EOT
-composer '--working-dir={workdir}/.composer/global/x/y' 'update' 'x/y'
-composer '--working-dir={workdir}/.composer/global/a/b' 'update' 'a/b'
-composer '--working-dir={workdir}/.composer/global/p/q' 'update' 'p/q'
-composer '--working-dir={workdir}/.composer/global/d/e' 'update' 'd/e'
+composer '--working-dir={workdir}/.composer/global/x/y' 'update'
+composer '--working-dir={workdir}/.composer/global/a/b' 'update'
+composer '--working-dir={workdir}/.composer/global/p/q' 'update'
+composer '--working-dir={workdir}/.composer/global/d/e' 'update'
 EOT;
 
           $argvCgrUpdateWithoutArgs = array(
@@ -109,7 +109,7 @@ EOT;
               'update',
           );
           $expectedCgrUpdateWithoutArgs = <<<EOT
-composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'update' 'testorg/testproject'
+composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'update'
 EOT;
 
           $argvCgrInfo = array(
