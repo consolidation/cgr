@@ -348,6 +348,34 @@ class Application
     }
 
     /**
+     * Command handler for commands where the project should not be provided
+     * as a parameter to Composer (e.g. 'update').
+     *
+     * @param string $composerCommand The composer command to run e.g. require
+     * @param string $execPath The path to composer
+     * @param array $composerArgs Anything from the global $argv to be passed
+     *   on to Composer
+     * @param array $projects A list of projects to install, with the key
+     *   specifying the project name, and the value specifying its version.
+     * @param array $options User options from the command line; see
+     *   $optionDefaultValues in the main() function.
+     * @return array
+     */
+    public function noProjectArgCommand($composerCommand, $execPath, $composerArgs, $projects, $options)
+    {
+        $globalBaseDir = $options['base-dir'];
+        $binDir = $options['bin-dir'];
+        $env = array("COMPOSER_BIN_DIR" => $binDir);
+        $result = array();
+        foreach ($projects as $project => $version) {
+            $installLocation = "$globalBaseDir/$project";
+            $commandToExec = $this->buildGlobalCommand($composerCommand, $execPath, $composerArgs, '', $env, $installLocation);
+            $result[] = $commandToExec;
+        }
+        return $result;
+    }
+
+    /**
      * If --stability VALUE is provided, then run a `composer config minimum-stability VALUE`
      * command to configure composer.json appropriately.
      *
@@ -423,7 +451,7 @@ class Application
             $projects = FileSystemUtils::allInstalledProjectsInBaseDir($options['base-dir']);
             $projects = $this->flipProjectsArray($projects);
         }
-        return $this->generalCommand('update', $execPath, $composerArgs, $projects, $options);
+        return $this->noProjectArgCommand('update', $execPath, $composerArgs, $projects, $options);
     }
 
     /**
@@ -467,7 +495,10 @@ class Application
      */
     public function buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
     {
-        $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand, $projectWithVersion);
+        $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand);
+        if (!empty($projectWithVersion)) {
+            $projectSpecificArgs[] = $projectWithVersion;
+        }
         $arguments = array_merge($composerArgs, $projectSpecificArgs);
         return new CommandToExec($execPath, $arguments, $env, $installLocation);
     }
