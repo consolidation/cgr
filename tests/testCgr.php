@@ -83,10 +83,10 @@ EOT;
             'd/e',
           );
           $expectedCgrRemove = <<<EOT
-rm -rf '{workdir}/x/y'
-rm -rf '{workdir}/a/b'
-rm -rf '{workdir}/p/q'
-rm -rf '{workdir}/d/e'
+rm -rf '{workdir}/.composer/global/x/y'
+rm -rf '{workdir}/.composer/global/a/b'
+rm -rf '{workdir}/.composer/global/p/q'
+rm -rf '{workdir}/.composer/global/d/e'
 EOT;
 
           $argvCgrUpdate = array(
