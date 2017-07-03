@@ -136,6 +136,23 @@ class Application
             $exitCode = $command->run($this->outputFile);
             if ($exitCode) {
                 return $exitCode;
+            } else {
+                /**
+                 * Make sure the project directory is removed also since `composer remove` will leave behind
+                 * an empty composer.json file.  This can potentially cause the `cgr info` command to abort
+                 * prior to completing the process of iterating through all the projects.
+                 */
+                list(, $workingDir, $composerCommand, $orgProject) = explode(' ', $command->getCommandString());
+                if ($composerCommand == "'remove'") {
+                    list(, $installLocation) = explode('=', $workingDir);
+                    $installLocation = str_replace("'", '', $installLocation);
+                    $composerJson = "$installLocation/composer.json";
+                    $composerContents = (array)json_decode(file_get_contents($composerJson));
+                    if (empty($composerContents->require)) {
+                        $remove = new CommandToExec('', '');
+                        return $remove->runCommand("rm -rf $installLocation");
+                    }
+                }
             }
         }
         return 0;
