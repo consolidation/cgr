@@ -136,23 +136,6 @@ class Application
             $exitCode = $command->run($this->outputFile);
             if ($exitCode) {
                 return $exitCode;
-            } else {
-                /**
-                 * Make sure the project directory is removed also since `composer remove` will leave behind
-                 * an empty composer.json file.  This can potentially cause the `cgr info` command to abort
-                 * prior to completing the process of iterating through all the projects.
-                 */
-                list(, $workingDir, $composerCommand, $orgProject) = explode(' ', $command->getCommandString());
-                if ($composerCommand == "'remove'") {
-                    list(, $installLocation) = explode('=', $workingDir);
-                    $installLocation = str_replace("'", '', $installLocation);
-                    $composerJson = "$installLocation/composer.json";
-                    $composerContents = (array)json_decode(file_get_contents($composerJson));
-                    if (empty($composerContents->require)) {
-                        $remove = new CommandToExec('', '');
-                        return $remove->runCommand("rm -rf $installLocation");
-                    }
-                }
             }
         }
         return 0;
@@ -217,7 +200,6 @@ class Application
                 $defaults[$key] = $envValue;
             }
         }
-
         return $defaults;
     }
 
@@ -420,7 +402,6 @@ class Application
             }
             $result[] = $this->buildConfigCommand($execPath, $composerArgs, 'minimum-stability', $stability, $env, $installLocation);
         }
-
         return $result;
     }
 
@@ -446,7 +427,6 @@ class Application
         }
         return $this->generalCommand('info', $execPath, $composerArgs, $projects, $options);
     }
-
 
     /**
      * Run `composer global update`. Not only do we want to update the
@@ -512,11 +492,16 @@ class Application
      */
     public function buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
     {
-        $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand);
-        if (!empty($projectWithVersion)) {
-            $projectSpecificArgs[] = $projectWithVersion;
+        if ($composerCommand == 'remove') {
+            $execPath = 'rm -rf';
+            $arguments = array($installLocation);
+        } else {
+            $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand);
+            if (!empty($projectWithVersion)) {
+                $projectSpecificArgs[] = $projectWithVersion;
+            }
+            $arguments = array_merge($composerArgs, $projectSpecificArgs);
         }
-        $arguments = array_merge($composerArgs, $projectSpecificArgs);
         return new CommandToExec($execPath, $arguments, $env, $installLocation);
     }
 
