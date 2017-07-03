@@ -200,7 +200,6 @@ class Application
                 $defaults[$key] = $envValue;
             }
         }
-
         return $defaults;
     }
 
@@ -403,7 +402,6 @@ class Application
             }
             $result[] = $this->buildConfigCommand($execPath, $composerArgs, 'minimum-stability', $stability, $env, $installLocation);
         }
-
         return $result;
     }
 
@@ -429,7 +427,6 @@ class Application
         }
         return $this->generalCommand('info', $execPath, $composerArgs, $projects, $options);
     }
-
 
     /**
      * Run `composer global update`. Not only do we want to update the
@@ -495,11 +492,16 @@ class Application
      */
     public function buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation)
     {
-        $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand);
-        if (!empty($projectWithVersion)) {
-            $projectSpecificArgs[] = $projectWithVersion;
+        if ($composerCommand == 'remove') {
+            $execPath = 'rm -rf';
+            $arguments = array($installLocation);
+        } else {
+            $projectSpecificArgs = array("--working-dir=$installLocation", $composerCommand);
+            if (!empty($projectWithVersion)) {
+                $projectSpecificArgs[] = $projectWithVersion;
+            }
+            $arguments = array_merge($composerArgs, $projectSpecificArgs);
         }
-        $arguments = array_merge($composerArgs, $projectSpecificArgs);
         return new CommandToExec($execPath, $arguments, $env, $installLocation);
     }
 
