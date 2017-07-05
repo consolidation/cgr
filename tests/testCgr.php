@@ -56,11 +56,11 @@ class CgrTests extends \PHPUnit_Framework_TestCase
             'dev-master',
         );
         $expectedCgrMultipleProjectForms = <<< EOT
-composer '--working-dir={workdir}/.composer/global/x/y' 'require' 'x/y:1.0'
-composer '--working-dir={workdir}/.composer/global/a/b' 'require' 'a/b:~2'
-composer '--working-dir={workdir}/.composer/global/p/q' 'require' 'p/q:^3'
-composer '--working-dir={workdir}/.composer/global/d/e' 'require' 'd/e'
-composer '--working-dir={workdir}/.composer/global/f/g' 'require' 'f/g:dev-master'
+composer '--working-dir={workdir}/.composer/global/x/y' require 'x/y:1.0'
+composer '--working-dir={workdir}/.composer/global/a/b' require 'a/b:~2'
+composer '--working-dir={workdir}/.composer/global/p/q' require 'p/q:^3'
+composer '--working-dir={workdir}/.composer/global/d/e' require 'd/e'
+composer '--working-dir={workdir}/.composer/global/f/g' require 'f/g:dev-master'
 EOT;
 
         $argvCgrWithMinimumStability = array(
@@ -70,8 +70,8 @@ EOT;
             'dev',
         );
         $expectedCgrWithMinimumStability = <<<EOT
-composer '--working-dir={workdir}/.composer/global/x/y' 'config' 'minimum-stability' 'dev'
-composer '--working-dir={workdir}/.composer/global/x/y' 'require' 'x/y:1.0'
+composer '--working-dir={workdir}/.composer/global/x/y' config minimum-stability dev
+composer '--working-dir={workdir}/.composer/global/x/y' require 'x/y:1.0'
 EOT;
 
         $argvCgrRemove = array(
@@ -83,10 +83,10 @@ EOT;
             'd/e',
           );
           $expectedCgrRemove = <<<EOT
-composer '--working-dir={workdir}/.composer/global/x/y' 'remove' 'x/y'
-composer '--working-dir={workdir}/.composer/global/a/b' 'remove' 'a/b'
-composer '--working-dir={workdir}/.composer/global/p/q' 'remove' 'p/q'
-composer '--working-dir={workdir}/.composer/global/d/e' 'remove' 'd/e'
+rm -rf '{workdir}/.composer/global/x/y'
+rm -rf '{workdir}/.composer/global/a/b'
+rm -rf '{workdir}/.composer/global/p/q'
+rm -rf '{workdir}/.composer/global/d/e'
 EOT;
 
           $argvCgrUpdate = array(
@@ -98,10 +98,10 @@ EOT;
               'd/e',
           );
           $expectedCgrUpdate = <<<EOT
-composer '--working-dir={workdir}/.composer/global/x/y' 'update'
-composer '--working-dir={workdir}/.composer/global/a/b' 'update'
-composer '--working-dir={workdir}/.composer/global/p/q' 'update'
-composer '--working-dir={workdir}/.composer/global/d/e' 'update'
+composer '--working-dir={workdir}/.composer/global/x/y' update
+composer '--working-dir={workdir}/.composer/global/a/b' update
+composer '--working-dir={workdir}/.composer/global/p/q' update
+composer '--working-dir={workdir}/.composer/global/d/e' update
 EOT;
 
           $argvCgrUpdateWithoutArgs = array(
@@ -109,7 +109,7 @@ EOT;
               'update',
           );
           $expectedCgrUpdateWithoutArgs = <<<EOT
-composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'update'
+composer '--working-dir={workdir}/.composer/global/testorg/testproject' update
 EOT;
 
           $argvCgrInfo = array(
@@ -121,10 +121,10 @@ EOT;
               'd/e',
           );
           $expectedCgrInfo = <<<EOT
-composer '--working-dir={workdir}/.composer/global/x/y' 'info' 'x/y'
-composer '--working-dir={workdir}/.composer/global/a/b' 'info' 'a/b'
-composer '--working-dir={workdir}/.composer/global/p/q' 'info' 'p/q'
-composer '--working-dir={workdir}/.composer/global/d/e' 'info' 'd/e'
+composer '--working-dir={workdir}/.composer/global/x/y' info 'x/y'
+composer '--working-dir={workdir}/.composer/global/a/b' info 'a/b'
+composer '--working-dir={workdir}/.composer/global/p/q' info 'p/q'
+composer '--working-dir={workdir}/.composer/global/d/e' info 'd/e'
 EOT;
 
           $argvCgrInfoWithoutArgs = array(
@@ -132,7 +132,7 @@ EOT;
               'info',
           );
           $expectedCgrInfoWithoutArgs = <<<EOT
-composer '--working-dir={workdir}/.composer/global/testorg/testproject' 'info' 'testorg/testproject'
+composer '--working-dir={workdir}/.composer/global/testorg/testproject' info 'testorg/testproject'
 EOT;
 
         return array(
