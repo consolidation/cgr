@@ -200,7 +200,6 @@ class Application
                 $defaults[$key] = $envValue;
             }
         }
-
         return $defaults;
     }
 
@@ -348,6 +347,30 @@ class Application
     }
 
     /**
+     * Remove command handler. Build an `rm -rf` command.
+     *
+     * @param string $execPath The path to composer (ignored)
+     * @param array $composerArgs Anything from the global $argv to be passed
+     *   on to Composer (ignored)
+     * @param array $projects A list of projects to install, with the key
+     *   specifying the project name, and the value specifying its version.
+     * @param array $options User options from the command line; see
+     *   $optionDefaultValues in the main() function.
+     * @return array
+     */
+    public function removeCommand($execPath, $composerArgs, $projects, $options)
+    {
+        $globalBaseDir = $options['base-dir'];
+        $env = array();
+        $result = array();
+        foreach ($projects as $project => $version) {
+            $installLocation = "$globalBaseDir/$project";
+            $result[] = new CommandToExec('rm', array('-rf', $installLocation), $env, $installLocation);
+        }
+        return $result;
+    }
+
+    /**
      * Command handler for commands where the project should not be provided
      * as a parameter to Composer (e.g. 'update').
      *
@@ -403,7 +426,6 @@ class Application
             }
             $result[] = $this->buildConfigCommand($execPath, $composerArgs, 'minimum-stability', $stability, $env, $installLocation);
         }
-
         return $result;
     }
 
@@ -429,7 +451,6 @@ class Application
         }
         return $this->generalCommand('info', $execPath, $composerArgs, $projects, $options);
     }
-
 
     /**
      * Run `composer global update`. Not only do we want to update the

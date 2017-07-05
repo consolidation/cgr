@@ -29,6 +29,9 @@ class CommandToExec
     public function getCommandString()
     {
         $escapedArgs = array_map(function ($item) {
+            if (preg_match('#^[a-zA-Z0-9_-]*$#', $item)) {
+                return $item;
+            }
             return escapeshellarg($item);
         }, $this->arguments);
         return $this->execPath . ' ' . implode(' ', $escapedArgs);
