@@ -362,7 +362,7 @@ class Application
     {
         $globalBaseDir = $options['base-dir'];
         $env = array();
-        $result = array();
+        $result = $this->generalCommand('remove', $execPath, $composerArgs, $projects, $options);
         foreach ($projects as $project => $version) {
             $installLocation = "$globalBaseDir/$project";
             $result[] = new CommandToExec('rm', array('-rf', $installLocation), $env, $installLocation);
