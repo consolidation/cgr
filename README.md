@@ -24,7 +24,12 @@ Because the cgr script has no dependencies of its own, it is safe to install via
 
 `composer global require consolidation/cgr`
 
-If you have not already done so, you will also need to add `~/.composer/vendor/bin` to your $PATH.  Thereafter, you may subsitute `cgr` for any commandline tool whose installation instructions recommends the use of Composer `global require`.
+If you have not already done so, you will also need to add the `vendor/bin` from the Composer home directory to your $PATH.  Thereafter, you may subsitute `cgr` for any commandline tool whose installation instructions recommends the use of Composer `global require`.
+
+To add the correct bin directory to your PATH:
+```
+PATH="$(composer config home)/vendor/bin:$PATH"
+```
 
 Example:
 
