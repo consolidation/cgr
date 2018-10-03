@@ -1,38 +1,47 @@
 language: php
 
 branches:
-  # Only test the master branch and SemVer tags.
   only:
-    - master
-    - /^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+.*$/
+  - master
+  - "/^[[:digit:]]+\\.[[:digit:]]+\\.[[:digit:]]+.*$/"
 
 matrix:
   include:
-    - php: 7.2
-    - php: 7.1
-    - php: 7.0
-    - php: 5.6
-    - php: 5.5
-    - php: 5.4
-    - php: 5.3
-      dist: precise
+  - php: 7.2
+  - php: 7.1
+  - php: 7.0
+  - php: 5.6
+  - php: 5.5
+  - php: 5.4
+  - php: 5.3
+    dist: precise
 
 sudo: false
 
 cache:
   directories:
-    - vendor
-    - $HOME/.composer/cache
+  - vendor
+  - "$HOME/.composer/cache"
 
 before_script:
-  - composer install
+- composer install
 
 script:
-  - composer test
+- composer test
 
 after_success:
-  - travis_retry php vendor/bin/coveralls -v
+- travis_retry php vendor/bin/coveralls -v
 
 before_deploy:
-  - composer phar:install-tools
-  - composer phar:build
+- composer phar:install-tools
+- composer phar:build
+
+deploy:
+  provider: releases
+  api_key:
+    secure: SEyixU1m+JixJBp6h4Smxe52gKyzNE5/e0IFiHEI2t91Mff4rOfC4qeKX2glra97ZgXE8+u/wwZ2lWlfKYCJevYkQBT/ar7JaBHLGijOBex9bOlfWFHEGKh2ql/FG+G/FR5fcu/nCd+TFDNS7Ho6eQ3ngMNFotIOUj/0p5SmQzVbgdWYWUq5Z46b7g+uL9hmCYcbQEAQ9zZsqCXEGFXpeqT9zqfx77ofR2HJFNzsXkyy1dwh9nPIZlqw0AijU8ftDNF6YRTvVirBx1FHLDA5VmncnQ66wy7HO4EIUiMpbdgSiSeiDIbkHOQky6gEqy1wIcX1jKy1UNwlLDrxG0q9oV1Z0ZuhkSRjpSXG3gj7GkiQCJ47YgjztOrcSv7c4iXtcZXKHsgALKNg0c7ybRxHDyyrPPNW3aFY1ja/KZNaJcYqfe+8hZhQ+kSMW778L32yCY7t7L2SIK6YDfIoGXDGMKws/Cobw+2mncgOZopZ6SDm1R1NlY1qyjKXvbzmz2Js6XsbKe3k+I6PJT8UQpifagOmMBoeokui2hvroBPJ0SnQhmqdbX67c9WV0eeJpyN68gaSo1bAxDKyQYRaQZn5c6l/fyGCcQIuEM9P/CY+H0+/7/hS1fTpxpVil7LnBeqQ5xhjbWi7G8Dm608d7jneWP3v2msmcu7U2omBRxcAIKA=
+  file: cgr.phar
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: consolidation/cgr
