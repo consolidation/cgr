@@ -19,6 +19,11 @@
         "squizlabs/php_codesniffer": "2.*"
     },
     "scripts": {
+        "phar:install-tools": [
+            "gem install mime-types -v 2.6.2",
+            "curl -LSs https://box-project.github.io/box2/installer.php | php"
+        ],
+        "phar:build": "PATH=.:$PATH box.phar build",
         "test": [ "@phpunit", "@cs" ],
         "phpunit": "phpunit --colors=always",
         "cs": "phpcs --standard=PSR2 -n src",

@@ -1,0 +1,25 @@
+{
+  "alias": "cgr.phar",
+  "chmod": "0755",
+  "compactors": [],
+  "directories": ["src","help","bin"],
+  "files": ["README.md"],
+  "finder": [
+    {
+      "name": "*.php",
+      "exclude": [
+        "test",
+        "tests",
+        "Test",
+        "Tests",
+        "Tester"
+      ],
+      "in": "vendor"
+    }
+  ],
+  "git-commit": "git-commit",
+  "git-version": "git-version",
+  "output": "cgr.phar",
+   "main": "bin/cgr",
+  "stub": true
+}

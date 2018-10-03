@@ -28,7 +28,7 @@ If you have not already done so, you will also need to add the `vendor/bin` from
 
 To add the correct bin directory to your PATH:
 ```
-PATH="$(composer config home)/vendor/bin:$PATH"
+PATH="$(composer config -g home)/vendor/bin:$PATH"
 ```
 
 Example:
