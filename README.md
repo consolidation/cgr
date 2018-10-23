@@ -53,7 +53,7 @@ To configure cgr to install binaries to ~/bin, add the following to your ~/.bash
 
 `export CGR_BIN_DIR=$HOME/bin`
 
-You may select any directory you like for the `CGR_BIN_DIR`, as long as if is in your $PATH.
+You may select any directory you like for the `CGR_BIN_DIR`, as long as it is in your $PATH.
 
 ## Display information
 
