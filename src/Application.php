@@ -246,7 +246,7 @@ class Application
      */
     public function separateProjectsFromArgs($argv, $options)
     {
-        $cgrCommands = array('info', 'require', 'update', 'remove');
+        $cgrCommands = array('info', 'require', 'update', 'remove', 'extend');
         $command = 'require';
         $composerArgs = array();
         $projects = array();
@@ -276,6 +276,8 @@ class Application
             } elseif ($arg == 'global') {
                 // Make note if we see the 'global' command.
                 $globalMode = true;
+            } elseif ($command == 'extend') {
+                $projects[$arg] = true;
             } else {
                 // If we see any command other than 'global [require|update|remove]',
                 // then we will pass *all* of the arguments through to
@@ -318,6 +320,33 @@ class Application
         return array_merge($stabilityCommands, $requireCommands);
     }
 
+    public function extendCommand($execPath, $composerArgs, $projects, $options)
+    {
+        $projectToExtend = $this->getProjectToExtend($projects);
+        if (!$projectToExtend) {
+            print "No command to extend specified\n";
+            exit(1);
+        }
+        array_shift($projects);
+
+        $options['base-dir'] .= '/' . $projectToExtend;
+        $options['extend-mode'] = true;
+        if (!is_dir($options['base-dir'])) {
+            print "Project $projectToExtend not found; try 'cgr require' first\n";
+            exit(1);
+        }
+
+        return $this->requireCommand($execPath, $composerArgs, $projects, $options);
+    }
+
+    protected function getProjectToExtend($projects)
+    {
+        $keys = array_keys($projects);
+        $project = array_shift($keys);
+
+        return $project;
+    }
+
     /**
      * General command handler.
      *
@@ -335,10 +364,11 @@ class Application
     {
         $globalBaseDir = $options['base-dir'];
         $binDir = $options['bin-dir'];
+        $extendMode = !empty($options['extend-mode']);
         $env = array("COMPOSER_BIN_DIR" => $binDir);
         $result = array();
         foreach ($projects as $project => $version) {
-            $installLocation = "$globalBaseDir/$project";
+            $installLocation = $extendMode ? $globalBaseDir : "$globalBaseDir/$project";
             $projectWithVersion = $this->projectWithVersion($project, $version);
             $commandToExec = $this->buildGlobalCommand($composerCommand, $execPath, $composerArgs, $projectWithVersion, $env, $installLocation);
             $result[] = $commandToExec;
