@@ -2,7 +2,7 @@ language: php
 
 branches:
   only:
-  - master
+  - main
   - "/^[[:digit:]]+\\.[[:digit:]]+\\.[[:digit:]]+.*$/"
 
 matrix:
