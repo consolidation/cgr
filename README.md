@@ -6,7 +6,7 @@ Provide a safer alternative to `composer global require`.
 
 ## Component Status
 
-Cgr has been used in real-world environments for several months with no reported problems; however, see 'Limitations', below.
+Cgr has been used in real-world environments for several years now; however, see the [issue queue](https://github.com/consolidation/cgr/issues), and 'Limitations', below.
 
 ## Motivation
 
